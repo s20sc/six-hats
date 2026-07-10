@@ -23,6 +23,17 @@ You give the board a topic. Six hats each respond in character:
 
 Each hat can be driven by a *different* model. Six Hats auto-detects whatever AI engines are available on your machine or in your `.env`, and randomly assigns one engine per hat. You can pin a hat to a specific engine or re-roll the assignment before running.
 
+## Features
+
+- **Six angles in parallel, Blue closes** — the five hats run concurrently; Blue reads them and synthesizes a conclusion plus next steps.
+- **Auto-detected engine pool** — finds local CLIs (`claude`/`codex`/`agy`/`hermes`/`openclaw`), local Ollama models, custom command templates, and keyed OpenAI-compatible cloud endpoints.
+- **Local-first, cloud fallback** — prefers local engines; cloud is used only when no local engine exists. Privacy-friendly and offline-capable.
+- **A different model per hat** — random-to-model assignment so the six angles come from genuinely different voices; pin or re-roll any hat.
+- **Per-hat refresh 🔄** — a hat timed out or missed the mark? Regenerate just that one instead of the whole board (refreshing Blue re-summarizes the other five).
+- **One-click copy / export 📋** — copy any hat's answer, copy Blue's conclusion, or "copy all" to export the topic + six answers + conclusion as Markdown, ready to paste into notes.
+- **Embedding models filtered out** — models whose name contains `embed` (e.g. `nomic-embed-text`) are never assigned to a hat, so they don't fail silently.
+- **Cross-platform · BYO-key** — macOS / Windows / Linux; runs anywhere Node does.
+
 ## How it works
 
 - **Engine pool**: at startup the server probes for local agent CLIs (`claude`, `codex`, `agy`, `hermes`, `openclaw`), local Ollama models, any custom command templates you define in `config.json`, and OpenAI-compatible cloud endpoints (only enabled if their API key is present in `.env`).
