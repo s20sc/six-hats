@@ -56,3 +56,14 @@ function makeFakeChild(code, stdout, stderr) {
   })
   return child
 }
+
+import { stripLeadingNoise } from '../src/server/engines/cli.js'
+describe('stripLeadingNoise', () => {
+  it('drops leading Claude Code hook preamble but keeps the answer', () => {
+    const raw = 'No skills needed\n\nActivating: foo — bar\n\n台风来了要囤水和干粮。\n还有充电宝。'
+    expect(stripLeadingNoise(raw)).toBe('台风来了要囤水和干粮。\n还有充电宝。')
+  })
+  it('leaves clean output untouched', () => {
+    expect(stripLeadingNoise('直接就是答案')).toBe('直接就是答案')
+  })
+})

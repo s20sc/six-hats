@@ -3,6 +3,18 @@ import { makeEngine } from './registry.js'
 
 const ANSI = /\x1b\[[0-9;]*m/g
 
+// Some agent CLIs (notably Claude Code with skill/hook plugins) print
+// preamble lines to stdout before the real answer, e.g. "No skills needed",
+// "Activating: <skill> — <reason>", "Using <skill> to <purpose>". Drop such
+// noise from the START of the output only, stopping at the first real line.
+const PREAMBLE = /^(no skills needed\.?|activating:.*|using .+ to .+|✳.*)$/i
+export function stripLeadingNoise(text) {
+  const lines = text.split('\n')
+  let i = 0
+  while (i < lines.length && (lines[i].trim() === '' || PREAMBLE.test(lines[i].trim()))) i++
+  return lines.slice(i).join('\n').trim()
+}
+
 export const CLI_TABLE = {
   claude:   { bin: 'claude',   buildArgs: (p) => ['-p', p],                              parse: 'raw' },
   codex:    { bin: 'codex',    buildArgs: (p) => ['exec', p],                            parse: 'raw' },
@@ -23,7 +35,7 @@ export function cleanOutput(raw, parse) {
     if (i < 0) return stripped.trim()
     try { return (JSON.parse(stripped.slice(i)).result?.payloads?.[0]?.text ?? '').trim() } catch { return stripped.trim() }
   }
-  return stripped.trim()
+  return stripLeadingNoise(stripped.trim())
 }
 
 export function runCliCommand(bin, args, { timeoutMs = 120000, spawnImpl = spawn } = {}) {
