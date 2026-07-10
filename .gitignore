@@ -1,5 +1,26 @@
 node_modules/
 dist/
+
+# Local runtime config & secrets
 .env
+.env.*
+!.env.example
+config.json
+
+# Keys / credentials
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+
+# Editor / OS
 .DS_Store
+*.log
+
+# Internal tooling / process artifacts (not for publication)
 .superpowers/
+.claude/
+audit/
+docs/superpowers/

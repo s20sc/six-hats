@@ -26,8 +26,8 @@ describe('config', () => {
     expect(without.openclawAgent).toBe(null)
   })
   it('exposes ollamaHost from OLLAMA_HOST env, defaulting to null', () => {
-    const withHost = loadConfig({ env: { OLLAMA_HOST: 'http://gpu.lan:11434' }, fileJson: null })
-    expect(withHost.ollamaHost).toBe('http://gpu.lan:11434')
+    const withHost = loadConfig({ env: { OLLAMA_HOST: 'http://ollama.example:11434' }, fileJson: null })
+    expect(withHost.ollamaHost).toBe('http://ollama.example:11434')
     const without = loadConfig({ env: {}, fileJson: null })
     expect(without.ollamaHost).toBe(null)
   })
