@@ -50,13 +50,25 @@ function SpeakingDots() {
   )
 }
 
+// Six-color spectrum — the signature mark tying the whole board to its six hats.
+function Spectrum({ hats, className = '' }) {
+  if (!hats?.length) return null
+  return (
+    <div className={`spectrum ${className}`} aria-hidden="true">
+      {hats.map((h) => (
+        <span key={h.id} style={{ background: accentOf(h) }} />
+      ))}
+    </div>
+  )
+}
+
 function EngineCredits({ summary }) {
   if (!summary) return null
   const keys = ['cli', 'ollama', 'cloud', 'custom']
   const total = keys.reduce((n, k) => n + (summary[k]?.length || 0), 0)
   return (
     <div className="credits">
-      <span className="credits__label">引擎</span>
+      <span className="credits__label">在场引擎</span>
       {total === 0 ? (
         <span className="credits__none">未检测到可用引擎</span>
       ) : (
@@ -108,6 +120,7 @@ function HatCard({ hat, index, engines, assignedId, pinnedId, onPinChange, resul
       </label>
 
       <div className="hat-body">
+        <span className="hat-index">{String(index + 1).padStart(2, '0')}</span>
         {status === 'error' ? (
           <span className="hat-error">⚠ {result.error}</span>
         ) : status === 'speaking' ? (
@@ -122,13 +135,14 @@ function HatCard({ hat, index, engines, assignedId, pinnedId, onPinChange, resul
   )
 }
 
-function Synthesis({ hat, engines, assignedId, pinnedId, onPinChange, result, summaryText, onRefresh, canRefresh, onCopy, copiedId }) {
+function Synthesis({ hat, hats, engines, assignedId, pinnedId, onPinChange, result, summaryText, onRefresh, canRefresh, onCopy, copiedId }) {
   const status = result?.status ?? 'idle'
   const assignedEngine = engines.find((e) => e.id === assignedId)
   const text = summaryText || result?.text || ''
 
   return (
     <section className="synthesis" style={{ '--hat-color': hat.color }}>
+      <Spectrum hats={hats} className="spectrum--rule" />
       <div className="synthesis__head">
         <div className="synthesis__kicker">
           <span className="hat-dot" />
@@ -159,7 +173,10 @@ function Synthesis({ hat, engines, assignedId, pinnedId, onPinChange, result, su
         ) : status === 'speaking' ? (
           <SpeakingDots />
         ) : text ? (
-          <p className="synthesis__text">{text}</p>
+          <>
+            <p className="synthesis__text">{text}</p>
+            <p className="synthesis__sign">— 蓝帽 · 主编综合</p>
+          </>
         ) : (
           <p className="synthesis__placeholder">其他帽子发言后，蓝帽在此综合共识与分歧，给出结论与下一步。</p>
         )}
@@ -180,6 +197,8 @@ export default function App() {
   const [summaryText, setSummaryText] = useState('')
   const [running, setRunning] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
+
+  const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 
   function copyText(text, id) {
     if (!text || !navigator.clipboard) return
@@ -311,21 +330,32 @@ export default function App() {
   return (
     <div className="app">
       <header className="masthead">
-        <div className="masthead__brand">
-          <h1 className="masthead__title">Six&nbsp;Hats</h1>
-          <p className="masthead__sub">六顶思考帽 · 协作审议</p>
+        <div className="masthead__top">
+          <span className="masthead__eyebrow">协作审议系统 · Six Thinking Hats</span>
+          <span className="masthead__date">{today}</span>
         </div>
-        <EngineCredits summary={summary} />
+        <div className="masthead__main">
+          <div className="masthead__brand">
+            <h1 className="masthead__title">Six&nbsp;Hats</h1>
+            <p className="masthead__sub">六顶思考帽 · 平行思维审议</p>
+            <Spectrum hats={hats} />
+          </div>
+          <EngineCredits summary={summary} />
+        </div>
       </header>
 
       <section className="deck">
-        <input
-          className="topic-input"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && canRun) run() }}
-          placeholder="输入你要审议的议题…"
-        />
+        <div className="deck__field">
+          <label className="deck__eyebrow" htmlFor="topic">本期议题 · Topic</label>
+          <input
+            id="topic"
+            className="topic-input"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && canRun) run() }}
+            placeholder="输入你要审议的议题…"
+          />
+        </div>
         <div className="deck__actions">
           <button className="btn" onClick={assign} disabled={!canAssign} title={canAssign ? '' : '未检测到可用引擎'}>
             随机分配
@@ -363,6 +393,7 @@ export default function App() {
       {blueHat && (
         <Synthesis
           hat={blueHat}
+          hats={hats}
           engines={engines}
           assignedId={assignment.blue}
           pinnedId={pins.blue}
