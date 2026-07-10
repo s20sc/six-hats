@@ -88,9 +88,13 @@ export default function App() {
   const [copiedId, setCopiedId] = useState(null)
 
   function copyText(text, id) {
+    if (!text || !navigator.clipboard) return
     navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    setTimeout(() => setCopiedId(null), 1500)
+      .then(() => {
+        setCopiedId(id)
+        setTimeout(() => setCopiedId(null), 1500)
+      })
+      .catch(() => {})
   }
 
   function buildMarkdown() {
