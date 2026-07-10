@@ -12,7 +12,7 @@ export const CLI_TABLE = {
 }
 
 export function whichSync(bin) {
-  try { return execFileSync(process.platform === 'win32' ? 'where' : 'which', [bin]).toString().trim().split('\n')[0] || null }
+  try { return execFileSync(process.platform === 'win32' ? 'where' : 'which', [bin]).toString().split('\n')[0].trim() || null }
   catch { return null }
 }
 
@@ -52,6 +52,7 @@ export function makeCliEngine(tool, { model = null } = {}, deps = {}) {
     model,
     run: async (prompt) => {
       const { code, stdout, stderr } = await runCliCommand(spec.bin, spec.buildArgs(prompt, model), { spawnImpl })
+      if (code !== 0) throw new Error(`${tool} exited ${code}: ${stderr.slice(0, 200)}`)
       const text = cleanOutput(stdout, spec.parse)
       if (!text) throw new Error(`${tool} returned no text (code ${code}): ${stderr.slice(0, 200)}`)
       return text

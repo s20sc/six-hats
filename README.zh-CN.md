@@ -87,7 +87,7 @@ OPENROUTER_API_KEY=sk-or-...
 }
 ```
 
-在 Windows 上，模板使用 `%SIXHATS_PROMPT%` 而非 `"$SIXHATS_PROMPT"`。
+自定义模板始终通过 POSIX shell（`sh`）运行，请使用 `"$SIXHATS_PROMPT"` 引用话题内容；在 Windows 上请使用 WSL 或 Git Bash 提供 `sh`。
 
 ## 皮肤（Skins）
 

@@ -87,7 +87,7 @@ You can wire up any command-line tool as an engine via the `custom` array in `co
 }
 ```
 
-On Windows, the template uses `%SIXHATS_PROMPT%` instead of `"$SIXHATS_PROMPT"`.
+Custom templates always run via a POSIX shell (`sh`), so reference the prompt as `"$SIXHATS_PROMPT"`. On Windows, use WSL or Git Bash to provide `sh`.
 
 ## Skins
 

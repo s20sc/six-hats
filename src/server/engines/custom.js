@@ -11,8 +11,7 @@ export function makeCustomEngine({ name, cmd, parse = 'raw' }, deps = {}) {
     model: null,
     run: (prompt) => new Promise((resolve, reject) => {
       let out = '', err = '', done = false
-      const [bin, args] = process.platform === 'win32' ? ['cmd', ['/c', cmd]] : ['sh', ['-c', cmd]]
-      const child = spawnImpl(bin, args, {
+      const child = spawnImpl('sh', ['-c', cmd], {
         stdio: ['ignore', 'pipe', 'pipe'],
         env: { ...process.env, SIXHATS_PROMPT: prompt },
       })

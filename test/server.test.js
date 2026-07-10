@@ -25,4 +25,18 @@ describe('server routes', () => {
     expect(res.body.summary).toBe('S')
     expect(res.body.contributions).toHaveLength(5)
   })
+  it('POST /api/run 400s when assignment is missing a hat', async () => {
+    const app = createApp({ registry: reg(), cfg })
+    const assignment = { white: 'e', red: 'e', black: 'e', yellow: 'e', green: 'e' } // blue omitted
+    const res = await call(app, 'post', '/api/run', { topic: 'T', assignment })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/blue/)
+  })
+  it('POST /api/run 400s when assignment references an unknown engine', async () => {
+    const app = createApp({ registry: reg(), cfg })
+    const assignment = { white: 'e', red: 'e', black: 'e', yellow: 'e', green: 'e', blue: 'nope' }
+    const res = await call(app, 'post', '/api/run', { topic: 'T', assignment })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/nope/)
+  })
 })

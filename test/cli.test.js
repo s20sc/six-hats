@@ -33,6 +33,11 @@ describe('cli adapter', () => {
     const eng = makeCliEngine('claude', {}, { which: () => null })
     expect(eng).toBe(null)
   })
+  it('makeCliEngine rejects when the child exits non-zero, even with stdout', async () => {
+    const fakeSpawn = () => makeFakeChild(1, 'partial output\n', 'boom')
+    const eng = makeCliEngine('claude', {}, { which: () => '/usr/bin/claude', spawnImpl: fakeSpawn })
+    await expect(eng.run('anything')).rejects.toThrow(/exited 1/)
+  })
 })
 
 // minimal EventEmitter-like fake child

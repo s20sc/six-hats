@@ -18,6 +18,7 @@ export function loadConfig({ env = process.env, fileJson } = {}) {
     skins: file?.skins ?? {},
     hatPromptOverrides: file?.hatPrompts ?? {},
     openclawAgent: file?.openclawAgent ?? null,
+    ollamaHost: env.OLLAMA_HOST || env.OLLAMA_BASE_URL || null,
   }
 }
 

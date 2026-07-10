@@ -26,3 +26,7 @@ export function bluePrompt(topic, contributions) {
 export function applySkin(hats, skins = {}) {
   return hats.map((h) => (skins[h.id] ? { ...h, name: skins[h.id].name ?? h.name, emoji: skins[h.id].emoji ?? h.emoji } : h))
 }
+
+export function applyPromptOverrides(hats, overrides = {}) {
+  return hats.map((h) => (overrides[h.id] ? { ...h, system: overrides[h.id] } : h))
+}

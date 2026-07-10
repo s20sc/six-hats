@@ -22,8 +22,8 @@ export async function detectEngines(cfg, deps = {}) {
   }
 
   // Ollama models
-  const models = await listOllama({ fetchImpl: deps.fetchImpl })
-  for (const m of models) reg.add(makeOllamaEngine(m, { fetchImpl: deps.fetchImpl }))
+  const models = await listOllama({ fetchImpl: deps.fetchImpl, baseUrl: cfg.ollamaHost || undefined })
+  for (const m of models) reg.add(makeOllamaEngine(m, { fetchImpl: deps.fetchImpl, baseUrl: cfg.ollamaHost || undefined }))
 
   // Cloud (already key-filtered by loadConfig)
   for (const c of cfg.cloud ?? []) {

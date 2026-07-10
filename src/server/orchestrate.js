@@ -7,9 +7,10 @@ export async function runDeliberation({ topic, hats, registry, assignment, onUpd
   const contributions = []
 
   await Promise.all(five.map(async (hat) => {
-    const engine = registry.get(assignment[hat.id])
     onUpdate(hat.id, { status: 'speaking', engineId: assignment[hat.id] })
     try {
+      const engine = registry.get(assignment[hat.id])
+      if (!engine) throw new Error(`engine '${assignment[hat.id]}' not found`)
       const text = await engine.run(hatPrompt(hat, topic))
       contributions.push({ hatId: hat.id, name: hat.name, text })
       onUpdate(hat.id, { status: 'done', text })
@@ -25,9 +26,10 @@ export async function runDeliberation({ topic, hats, registry, assignment, onUpd
 
   let summary = ''
   if (ordered.length > 0) {
-    const engine = registry.get(assignment[blue.id])
     onUpdate(blue.id, { status: 'speaking', engineId: assignment[blue.id] })
     try {
+      const engine = registry.get(assignment[blue.id])
+      if (!engine) throw new Error(`engine '${assignment[blue.id]}' not found`)
       summary = await engine.run(bluePrompt(topic, ordered))
       onUpdate(blue.id, { status: 'done', text: summary })
     } catch (e) {

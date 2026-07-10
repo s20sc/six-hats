@@ -103,6 +103,11 @@ export default function App() {
         body: JSON.stringify({ topic, assignment }),
       })
       const d = await res.json()
+      if (!res.ok) {
+        setResults(Object.fromEntries(hats.map((h) => [h.id, { status: 'error', error: d.error || '运行失败' }])))
+        setSummaryText('')
+        return
+      }
       const next = {}
       for (const h of hats) {
         if (h.id === 'blue') {
