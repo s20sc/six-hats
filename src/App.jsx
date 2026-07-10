@@ -22,7 +22,7 @@ function EnginePanel({ summary }) {
   )
 }
 
-function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result }) {
+function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRefresh, canRefresh }) {
   const status = result?.status ?? 'idle'
   const assignedEngine = engines.find((e) => e.id === assignedId)
 
@@ -32,6 +32,14 @@ function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result }) {
         <span className="hat-emoji">{hat.emoji}</span>
         <span className="hat-name">{hat.name}</span>
         <span className={`hat-status hat-status--${status}`}>{STATUS_LABELS[status]}</span>
+        <button
+          className="hat-refresh"
+          onClick={() => onRefresh(hat.id)}
+          disabled={!canRefresh}
+          title="重新生成这一顶帽子"
+        >
+          🔄
+        </button>
       </div>
 
       <label className="hat-pin">
@@ -128,6 +136,39 @@ export default function App() {
     }
   }
 
+  async function refreshHat(hatId) {
+    const hat = hats.find((h) => h.id === hatId)
+    if (!hat) return
+    const engineId = pins[hatId] || assignment[hatId]
+    if (!engineId) return
+
+    setResults((prev) => ({ ...prev, [hatId]: { status: 'speaking', engineId } }))
+
+    const contributions = hat.id === 'blue'
+      ? hats
+          .filter((h) => h.id !== 'blue' && results[h.id]?.status === 'done' && results[h.id]?.text)
+          .map((h) => ({ hatId: h.id, name: h.name, text: results[h.id].text }))
+      : []
+
+    try {
+      const res = await fetch('/api/run-hat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, hatId, engineId, contributions }),
+      })
+      const d = await res.json()
+      if (!res.ok) {
+        setResults((prev) => ({ ...prev, [hatId]: { status: 'error', error: d.error || '刷新失败' } }))
+        return
+      }
+      const next = d.text ? { status: 'done', text: d.text } : { status: 'error', error: d.error || '未知错误' }
+      setResults((prev) => ({ ...prev, [hatId]: next }))
+      if (hatId === 'blue' && d.text) setSummaryText(d.text)
+    } catch (err) {
+      setResults((prev) => ({ ...prev, [hatId]: { status: 'error', error: err.message } }))
+    }
+  }
+
   const canAssign = engines.length > 0
   const canRun = !running && topic.trim() && Object.keys(assignment).length > 0
 
@@ -167,6 +208,8 @@ export default function App() {
             pinnedId={pins[h.id]}
             onPinChange={(hatId, engineId) => setPins((p) => ({ ...p, [hatId]: engineId }))}
             result={results[h.id]}
+            onRefresh={refreshHat}
+            canRefresh={Boolean(topic.trim()) && Boolean(assignment[h.id])}
           />
         ))}
       </section>

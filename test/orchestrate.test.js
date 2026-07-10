@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { runDeliberation } from '../src/server/orchestrate.js'
+import { runDeliberation, runSingleHat } from '../src/server/orchestrate.js'
 import { HATS } from '../src/server/hats.js'
 
 function fakeRegistry(map) {
@@ -25,5 +25,28 @@ describe('orchestrate', () => {
     expect(res.errors.red).toMatch(/boom/)
     expect(res.contributions).toHaveLength(4)
     expect(res.summary).toBe('SUM')
+  })
+})
+
+describe('runSingleHat', () => {
+  it('calls the engine with the hat prompt for a non-blue hat', async () => {
+    const white = HATS.find((h) => h.id === 'white')
+    const engine = { run: async (p) => p }
+    const text = await runSingleHat({ topic: 'T', hat: white, engine, contributions: [] })
+    expect(text).toContain(white.system)
+    expect(text).toContain('T')
+  })
+
+  it('builds a summary prompt with contributions for the blue hat', async () => {
+    const blue = HATS.find((h) => h.id === 'blue')
+    const engine = { run: async (p) => p }
+    const text = await runSingleHat({
+      topic: 'T',
+      hat: blue,
+      engine,
+      contributions: [{ name: '白帽', text: 'FACT-TEXT' }],
+    })
+    expect(text).toContain('FACT-TEXT')
+    expect(text).toContain('其他帽子的发言')
   })
 })
