@@ -18,6 +18,20 @@ describe('server routes', () => {
     const res = await call(createApp({ registry: reg(), cfg }), 'get', '/api/engines')
     expect(res.body.engines[0].id).toBe('e')
   })
+  it('GET /api/engines re-detects each call when a detect fn is given', async () => {
+    let n = 0
+    const detect = async () => {
+      n++
+      const r = new EngineRegistry()
+      r.add(makeEngine({ id: `fresh${n}`, type: 'cli', label: 'F', run: async () => 'x' }))
+      return r
+    }
+    const app = createApp({ registry: reg(), cfg, detect })
+    const res1 = await call(app, 'get', '/api/engines')
+    expect(res1.body.engines[0].id).toBe('fresh1')   // picks up newly detected engine
+    const res2 = await call(app, 'get', '/api/engines')
+    expect(res2.body.engines[0].id).toBe('fresh2')   // refreshes on every call
+  })
   it('POST /api/run returns summary', async () => {
     const app = createApp({ registry: reg(), cfg })
     const assignment = { white: 'e', red: 'e', black: 'e', yellow: 'e', green: 'e', blue: 'e' }

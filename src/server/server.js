@@ -12,17 +12,20 @@ import { runDeliberation, runSingleHat } from './orchestrate.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export function createApp({ registry, cfg }) {
+export function createApp({ registry, cfg, detect } = {}) {
   const app = express()
   app.use(express.json())
   const hats = applyPromptOverrides(applySkin(HATS, cfg.skins), cfg.hatPromptOverrides)
+  // Mutable so a live re-detect (below) can pick up engines installed after startup.
+  let reg = registry
 
-  app.get('/api/engines', (req, res) => {
-    res.json({ engines: registry.list().map((e) => ({ id: e.id, type: e.type, label: e.label })), summary: summarize(registry) })
+  app.get('/api/engines', async (req, res) => {
+    if (detect) { try { reg = await detect() } catch {} }
+    res.json({ engines: reg.list().map((e) => ({ id: e.id, type: e.type, label: e.label })), summary: summarize(reg) })
   })
   app.get('/api/hats', (req, res) => res.json(hats.map(({ id, color, emoji, name }) => ({ id, color, emoji, name }))))
   app.post('/api/assign', (req, res) => {
-    try { res.json({ assignment: assignEngines(hats, registry.localFirst(), { pins: req.body?.pins ?? {} }) }) }
+    try { res.json({ assignment: assignEngines(hats, reg.localFirst(), { pins: req.body?.pins ?? {} }) }) }
     catch (e) { res.status(400).json({ error: e.message }) }
   })
   app.post('/api/run', async (req, res) => {
@@ -31,9 +34,9 @@ export function createApp({ registry, cfg }) {
       if (!topic || !assignment || Object.keys(assignment).length === 0) return res.status(400).json({ error: 'missing topic/assignment' })
       const missingHat = hats.find((h) => !assignment[h.id])
       if (missingHat) return res.status(400).json({ error: `assignment missing hat: ${missingHat.id}` })
-      const badEngine = Object.values(assignment).find((id) => !registry.get(id))
+      const badEngine = Object.values(assignment).find((id) => !reg.get(id))
       if (badEngine) return res.status(400).json({ error: `unknown engine: ${badEngine}` })
-      const result = await runDeliberation({ topic, hats, registry, assignment })
+      const result = await runDeliberation({ topic, hats, registry: reg, assignment })
       try { fs.writeFileSync(stateFile(), JSON.stringify({ topic, ...result }, null, 2)) } catch {}
       res.json(result)
     } catch (e) {
@@ -46,7 +49,7 @@ export function createApp({ registry, cfg }) {
       if (!topic || !hatId || !engineId) return res.status(400).json({ error: 'missing topic/hatId/engineId' })
       const hat = hats.find((h) => h.id === hatId)
       if (!hat) return res.status(400).json({ error: `unknown hat: ${hatId}` })
-      const engine = registry.get(engineId)
+      const engine = reg.get(engineId)
       if (!engine) return res.status(400).json({ error: `unknown engine: ${engineId}` })
       try {
         const text = await runSingleHat({ topic, hat, engine, contributions })
@@ -69,8 +72,9 @@ export function createApp({ registry, cfg }) {
 
 export async function start() {
   const cfg = loadConfig()
-  const registry = await detectEngines(cfg)
-  const app = createApp({ registry, cfg })
+  const detect = () => detectEngines(cfg)
+  const registry = await detect()
+  const app = createApp({ registry, cfg, detect })
   const host = process.env.HOST || '127.0.0.1'
   app.listen(cfg.port, host, () => console.log(`Six Hats running on http://${host}:${cfg.port}`))
 }
