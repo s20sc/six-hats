@@ -1,15 +1,14 @@
-import { spawn } from 'node:child_process'
-import { execFileSync } from 'node:child_process'
+import { spawn, execFileSync } from 'node:child_process'
 import { makeEngine } from './registry.js'
 
-const ANSI = /\[[0-9;]*m/g
+const ANSI = /\x1b\[[0-9;]*m/g
 
 export const CLI_TABLE = {
   claude:   { bin: 'claude',   buildArgs: (p) => ['-p', p],                              parse: 'raw' },
   codex:    { bin: 'codex',    buildArgs: (p) => ['exec', p],                            parse: 'raw' },
   agy:      { bin: 'agy',      buildArgs: (p) => ['-p', p],                              parse: 'raw' },
   hermes:   { bin: 'hermes',   buildArgs: (p, m) => (m ? ['-z', p, '-m', m] : ['-z', p]), parse: 'raw' },
-  openclaw: { bin: 'openclaw', buildArgs: (p, m) => ['agent', '--agent', m, '--message', p, '--json'], parse: 'openclaw-json' },
+  openclaw: { bin: 'openclaw', buildArgs: (p, m) => { if (!m) throw new Error('openclaw requires an agent id (model)'); return ['agent', '--agent', m, '--message', p, '--json'] }, parse: 'openclaw-json' },
 }
 
 export function whichSync(bin) {
@@ -33,9 +32,9 @@ export function runCliCommand(bin, args, { timeoutMs = 120000, spawnImpl = spawn
     const child = spawnImpl(bin, args, { stdio: ['ignore', 'pipe', 'pipe'] })
     child.stdout.on('data', (d) => { out += d.toString() })
     child.stderr.on('data', (d) => { err += d.toString() })
-    child.on('close', (code) => { if (!done) { done = true; resolve({ code, stdout: out, stderr: err }) } })
-    child.on('error', (e) => { if (!done) { done = true; reject(e) } })
-    setTimeout(() => { if (!done) { done = true; try { child.kill() } catch {} reject(new Error(`${bin} timed out`)) } }, timeoutMs)
+    const timer = setTimeout(() => { if (!done) { done = true; try { child.kill() } catch {} reject(new Error(`${bin} timed out`)) } }, timeoutMs)
+    child.on('close', (code) => { if (!done) { done = true; clearTimeout(timer); resolve({ code, stdout: out, stderr: err }) } })
+    child.on('error', (e) => { if (!done) { done = true; clearTimeout(timer); reject(e) } })
   })
 }
 

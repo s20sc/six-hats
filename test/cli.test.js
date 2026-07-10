@@ -13,12 +13,21 @@ describe('cli adapter', () => {
     expect(CLI_TABLE.hermes.buildArgs('q')).toEqual(['-z', 'q'])
   })
   it('cleanOutput strips ANSI and trims for raw', () => {
-    expect(cleanOutput('[32mhi[0m\n', 'raw')).toBe('hi')
+    expect(cleanOutput('\x1b[32mhi\x1b[0m\n', 'raw')).toBe('hi')
+  })
+  it('cleanOutput parses openclaw-json payload text', () => {
+    expect(cleanOutput('log line\n{"result":{"payloads":[{"text":"hi there"}]}}', 'openclaw-json')).toBe('hi there')
+  })
+  it('openclaw buildArgs throws without a model/agent id', () => {
+    expect(() => CLI_TABLE.openclaw.buildArgs('p')).toThrow('openclaw requires an agent id (model)')
   })
   it('makeCliEngine runs via injected spawn and returns cleaned text', async () => {
-    const fakeSpawn = () => makeFakeChild(0, 'the answer\n', '')
+    let seenBin, seenArgs
+    const fakeSpawn = (bin, args) => { seenBin = bin; seenArgs = args; return makeFakeChild(0, 'the answer\n', '') }
     const eng = makeCliEngine('claude', {}, { which: () => '/usr/bin/claude', spawnImpl: fakeSpawn })
     expect(await eng.run('anything')).toBe('the answer')
+    expect(seenBin).toBe('claude')
+    expect(seenArgs).toEqual(['-p', 'anything'])
   })
   it('makeCliEngine returns null when bin missing', () => {
     const eng = makeCliEngine('claude', {}, { which: () => null })
