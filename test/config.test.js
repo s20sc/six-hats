@@ -19,4 +19,10 @@ describe('config', () => {
   it('stateFile lives in os.tmpdir()', () => {
     expect(stateFile().startsWith(os.tmpdir())).toBe(true)
   })
+  it('exposes openclawAgent from file config, defaulting to null', () => {
+    const withAgent = loadConfig({ env: {}, fileJson: { openclawAgent: 'main' } })
+    expect(withAgent.openclawAgent).toBe('main')
+    const without = loadConfig({ env: {}, fileJson: null })
+    expect(without.openclawAgent).toBe(null)
+  })
 })

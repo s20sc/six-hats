@@ -17,6 +17,7 @@ export function loadConfig({ env = process.env, fileJson } = {}) {
     custom: file?.custom ?? [],
     skins: file?.skins ?? {},
     hatPromptOverrides: file?.hatPrompts ?? {},
+    openclawAgent: file?.openclawAgent ?? null,
   }
 }
 

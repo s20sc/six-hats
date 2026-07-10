@@ -16,6 +16,15 @@ describe('detect', () => {
     expect(ids).toContain('ollama:qwen2.5')
     expect(ids).toContain('openai:gpt-4o')
   })
+  it('registers the openclaw CLI engine when cfg.openclawAgent is set', async () => {
+    const cfg = { cloud: [], custom: [], openclawAgent: 'main' }
+    const reg = await detectEngines(cfg, {
+      which: (bin) => (bin === 'openclaw' ? '/usr/bin/openclaw' : null),
+      listOllama: async () => [],
+    })
+    const ids = reg.list().map((e) => e.id)
+    expect(ids).toContain('openclaw:main')
+  })
   it('summarize groups by family', async () => {
     const cfg = { cloud: [], custom: [] }
     const reg = await detectEngines(cfg, { which: (b) => (b === 'claude' ? '/x' : null), listOllama: async () => [] })
