@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import express from 'express'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -26,7 +27,7 @@ export function createApp({ registry, cfg }) {
   })
   app.post('/api/run', async (req, res) => {
     const { topic, assignment } = req.body ?? {}
-    if (!topic || !assignment) return res.status(400).json({ error: 'missing topic/assignment' })
+    if (!topic || !assignment || Object.keys(assignment || {}).length === 0) return res.status(400).json({ error: 'missing topic/assignment' })
     const result = await runDeliberation({ topic, hats, registry, assignment })
     try { fs.writeFileSync(stateFile(), JSON.stringify({ topic, ...result }, null, 2)) } catch {}
     res.json(result)

@@ -16,9 +16,9 @@ describe('hats', () => {
     expect(p).toContain('gut')
   })
   it('applySkin overrides display name but keeps persona', () => {
-    const skinned = applySkin(HATS, { white: { name: '双儿' } })
+    const skinned = applySkin(HATS, { white: { name: 'Scout' } })
     const white = skinned.find((h) => h.id === 'white')
-    expect(white.name).toBe('双儿')
+    expect(white.name).toBe('Scout')
     expect(white.system).toBe(HATS[0].system)
   })
 })

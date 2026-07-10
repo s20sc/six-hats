@@ -4,8 +4,7 @@
 
 A local-first deliberation board built on Edward de Bono's Six Thinking Hats method — six AI personas debate your topic from six angles, then one of them synthesizes the discussion into a conclusion.
 
-![screenshot placeholder](pics/screenshot.png)
-<!-- Add a screenshot to pics/screenshot.png to replace this placeholder. -->
+_Screenshot coming soon._
 
 ## What it is
 
@@ -87,6 +86,8 @@ You can wire up any command-line tool as an engine via the `custom` array in `co
   ]
 }
 ```
+
+On Windows, the template uses `%SIXHATS_PROMPT%` instead of `"$SIXHATS_PROMPT"`.
 
 ## Skins
 

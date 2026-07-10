@@ -23,4 +23,17 @@ describe('assign', () => {
     const b = assignEngines(HATS, [eng('a'), eng('b'), eng('c')], { rng: seed })
     expect(a).toEqual(b)
   })
+  it('draws non-pinned hats only from local engines when a local engine exists', () => {
+    const engines = [
+      { id: 'claude', type: 'cli', run: async () => '' },
+      { id: 'gpt', type: 'cloud', run: async () => '' },
+    ]
+    const a = assignEngines(HATS, engines, { rng: () => 0.99 })
+    expect(Object.values(a).every((id) => id === 'claude')).toBe(true)
+  })
+  it('falls back to cloud engines when there are zero local engines', () => {
+    const engines = [{ id: 'gpt', type: 'cloud', run: async () => '' }]
+    const a = assignEngines(HATS, engines, { rng: () => 0.99 })
+    expect(Object.values(a).every((id) => id === 'gpt')).toBe(true)
+  })
 })

@@ -4,8 +4,7 @@
 
 一个基于爱德华·德博诺（Edward de Bono）六顶思考帽方法的本地优先协作看板 —— 六个 AI 角色从六个不同角度就你的话题展开讨论，最后由其中一个角色综合归纳出结论。
 
-![screenshot placeholder](pics/screenshot.png)
-<!-- 将截图放到 pics/screenshot.png 以替换此占位图。 -->
+_截图即将添加。_
 
 ## 这是什么
 
@@ -87,6 +86,8 @@ OPENROUTER_API_KEY=sk-or-...
   ]
 }
 ```
+
+在 Windows 上，模板使用 `%SIXHATS_PROMPT%` 而非 `"$SIXHATS_PROMPT"`。
 
 ## 皮肤（Skins）
 
