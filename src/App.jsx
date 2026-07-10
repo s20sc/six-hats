@@ -2,61 +2,105 @@ import { useEffect, useState } from 'react'
 import './App.css'
 
 const SUMMARY_LABELS = { cli: 'CLI', ollama: 'Ollama', cloud: 'Cloud', custom: 'Custom' }
-const STATUS_LABELS = { idle: '等待', speaking: '思考中', done: '已完成', error: '出错' }
+const STATUS_LABELS = { idle: '待发言', speaking: '思考中', done: '已完成', error: '出错' }
 
-function EnginePanel({ summary }) {
+// Editorial kicker for each hat — the API only sends id/color/emoji/name.
+const HAT_LABELS = {
+  white: '事实与数据',
+  red: '直觉与感受',
+  black: '谨慎与风险',
+  yellow: '价值与收益',
+  green: '创造与发散',
+  blue: '综合与推进',
+}
+
+// The white hat's #e5e7eb is nearly invisible on light paper — give its
+// accents a legible warm-gray while keeping the "neutral/white" reading.
+const HAT_ACCENT = { white: '#a8a29e' }
+const accentOf = (hat) => HAT_ACCENT[hat.id] || hat.color
+
+/* ── Inline icons (crisp, currentColor) ─────────────────────────── */
+function IconCopy() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" />
+    </svg>
+  )
+}
+function IconCheck() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  )
+}
+function IconRefresh() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" />
+    </svg>
+  )
+}
+
+function SpeakingDots() {
+  return (
+    <span className="dots" aria-label="思考中">
+      <span /><span /><span />
+    </span>
+  )
+}
+
+function EngineCredits({ summary }) {
   if (!summary) return null
   const keys = ['cli', 'ollama', 'cloud', 'custom']
   const total = keys.reduce((n, k) => n + (summary[k]?.length || 0), 0)
   return (
-    <section className="engines">
-      <div className="engines__title">引擎检测 {total === 0 && <span className="engines__none">未检测到可用引擎</span>}</div>
-      <div className="engines__badges">
-        {keys.map((k) => (
-          <span key={k} className={`badge ${summary[k]?.length ? 'badge--on' : 'badge--off'}`}>
-            {SUMMARY_LABELS[k]}: {summary[k]?.length ? summary[k].join(', ') : '—'}
-          </span>
-        ))}
-      </div>
-    </section>
+    <div className="credits">
+      <span className="credits__label">引擎</span>
+      {total === 0 ? (
+        <span className="credits__none">未检测到可用引擎</span>
+      ) : (
+        keys
+          .filter((k) => summary[k]?.length)
+          .map((k) => (
+            <span key={k} className="credits__group">
+              <span className="credits__kind">{SUMMARY_LABELS[k]}</span>
+              {summary[k].join(' · ')}
+            </span>
+          ))
+      )}
+    </div>
   )
 }
 
-function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRefresh, canRefresh, onCopy, copiedId }) {
+function HatCard({ hat, index, engines, assignedId, pinnedId, onPinChange, result, onRefresh, canRefresh, onCopy, copiedId }) {
   const status = result?.status ?? 'idle'
   const assignedEngine = engines.find((e) => e.id === assignedId)
   const canCopy = Boolean(result?.text)
 
   return (
-    <div className={`hat hat--${status}`} style={{ '--hat-color': hat.color }}>
+    <article className={`hat hat--${status}`} style={{ '--hat-color': accentOf(hat), '--i': index }}>
       <div className="hat-head">
-        <span className="hat-emoji">{hat.emoji}</span>
-        <span className="hat-name">{hat.name}</span>
+        <span className="hat-dot" />
+        <div className="hat-title">
+          <span className="hat-name">{hat.name}</span>
+          <span className="hat-kicker">{HAT_LABELS[hat.id] || ''}</span>
+        </div>
         <span className={`hat-status hat-status--${status}`}>{STATUS_LABELS[status]}</span>
-        <button
-          className="hat-copy"
-          onClick={() => onCopy(result?.text, hat.id)}
-          disabled={!canCopy}
-          title="复制这一顶帽子的内容"
-        >
-          {copiedId === hat.id ? '✓' : '📋'}
-        </button>
-        <button
-          className="hat-refresh"
-          onClick={() => onRefresh(hat.id)}
-          disabled={!canRefresh}
-          title="重新生成这一顶帽子"
-        >
-          🔄
-        </button>
+        <div className="hat-tools">
+          <button className="tool" onClick={() => onCopy(result?.text, hat.id)} disabled={!canCopy} title="复制这一顶帽子的内容">
+            {copiedId === hat.id ? <IconCheck /> : <IconCopy />}
+          </button>
+          <button className="tool" onClick={() => onRefresh(hat.id)} disabled={!canRefresh} title="重新生成这一顶帽子">
+            <IconRefresh />
+          </button>
+        </div>
       </div>
 
       <label className="hat-pin">
         <span className="hat-pin__label">引擎</span>
         <select value={pinnedId ?? ''} onChange={(e) => onPinChange(hat.id, e.target.value || null)}>
-          <option value="">
-            随机{assignedEngine ? ` → ${assignedEngine.label}` : ''}
-          </option>
+          <option value="">随机{assignedEngine ? ` → ${assignedEngine.label}` : ''}</option>
           {engines.map((en) => (
             <option key={en.id} value={en.id}>{en.label}</option>
           ))}
@@ -66,11 +110,61 @@ function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRe
       <div className="hat-body">
         {status === 'error' ? (
           <span className="hat-error">⚠ {result.error}</span>
+        ) : status === 'speaking' ? (
+          <SpeakingDots />
+        ) : result?.text ? (
+          <p className="hat-text">{result.text}</p>
         ) : (
-          <p className="hat-text">{result?.text ?? ''}</p>
+          <p className="hat-placeholder">待发言</p>
         )}
       </div>
-    </div>
+    </article>
+  )
+}
+
+function Synthesis({ hat, engines, assignedId, pinnedId, onPinChange, result, summaryText, onRefresh, canRefresh, onCopy, copiedId }) {
+  const status = result?.status ?? 'idle'
+  const assignedEngine = engines.find((e) => e.id === assignedId)
+  const text = summaryText || result?.text || ''
+
+  return (
+    <section className="synthesis" style={{ '--hat-color': hat.color }}>
+      <div className="synthesis__head">
+        <div className="synthesis__kicker">
+          <span className="hat-dot" />
+          <span className="synthesis__name">{hat.name}</span>
+          <span className="synthesis__sub">主编综合 · 结论与下一步</span>
+        </div>
+        <div className="synthesis__tools">
+          <label className="hat-pin hat-pin--inline">
+            <span className="hat-pin__label">引擎</span>
+            <select value={pinnedId ?? ''} onChange={(e) => onPinChange(hat.id, e.target.value || null)}>
+              <option value="">随机{assignedEngine ? ` → ${assignedEngine.label}` : ''}</option>
+              {engines.map((en) => (
+                <option key={en.id} value={en.id}>{en.label}</option>
+              ))}
+            </select>
+          </label>
+          <button className="tool" onClick={() => onCopy(text, hat.id)} disabled={!text} title="复制蓝帽总结">
+            {copiedId === hat.id ? <IconCheck /> : <IconCopy />}
+          </button>
+          <button className="tool" onClick={() => onRefresh(hat.id)} disabled={!canRefresh} title="重新生成总结">
+            <IconRefresh />
+          </button>
+        </div>
+      </div>
+      <div className="synthesis__body">
+        {status === 'error' ? (
+          <span className="hat-error">⚠ {result.error}</span>
+        ) : status === 'speaking' ? (
+          <SpeakingDots />
+        ) : text ? (
+          <p className="synthesis__text">{text}</p>
+        ) : (
+          <p className="synthesis__placeholder">其他帽子发言后，蓝帽在此综合共识与分歧，给出结论与下一步。</p>
+        )}
+      </div>
+    </section>
   )
 }
 
@@ -207,48 +301,52 @@ export default function App() {
     }
   }
 
+  const inputHats = hats.filter((h) => h.id !== 'blue')
+  const blueHat = hats.find((h) => h.id === 'blue')
+
   const canAssign = engines.length > 0
   const canRun = !running && topic.trim() && Object.keys(assignment).length > 0
   const canCopyAll = hats.some((h) => results[h.id]?.status === 'done' && results[h.id]?.text)
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>🎩 Six Hats</h1>
-        <span className="app-tagline">六顶思考帽 · 便携版</span>
+      <header className="masthead">
+        <div className="masthead__brand">
+          <h1 className="masthead__title">Six&nbsp;Hats</h1>
+          <p className="masthead__sub">六顶思考帽 · 协作审议</p>
+        </div>
+        <EngineCredits summary={summary} />
       </header>
 
-      <EnginePanel summary={summary} />
-
-      <section className="controls">
+      <section className="deck">
         <input
           className="topic-input"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          placeholder="输入议题…"
+          onKeyDown={(e) => { if (e.key === 'Enter' && canRun) run() }}
+          placeholder="输入你要审议的议题…"
         />
-        <button className="btn" onClick={assign} disabled={!canAssign} title={canAssign ? '' : '未检测到可用引擎'}>
-          随机分配
-        </button>
-        <button className="btn btn--primary" onClick={run} disabled={!canRun}>
-          {running ? '思考中…' : '开始'}
-        </button>
-        <button
-          className="btn copy-all"
-          onClick={() => copyText(buildMarkdown(), 'all')}
-          disabled={!canCopyAll}
-        >
-          {copiedId === 'all' ? '✓ 已复制' : '复制全部'}
-        </button>
+        <div className="deck__actions">
+          <button className="btn" onClick={assign} disabled={!canAssign} title={canAssign ? '' : '未检测到可用引擎'}>
+            随机分配
+          </button>
+          <button className="btn btn--primary" onClick={run} disabled={!canRun}>
+            {running ? '思考中…' : '开始审议'}
+          </button>
+          <button className="btn btn--ghost" onClick={() => copyText(buildMarkdown(), 'all')} disabled={!canCopyAll}>
+            {copiedId === 'all' ? '已复制 ✓' : '复制全部'}
+          </button>
+        </div>
       </section>
 
       {assignError && <div className="assign-error">⚠ {assignError}</div>}
 
-      <section className="hats">
-        {hats.map((h) => (
+      <section className="columns">
+        {inputHats.map((h, i) => (
           <HatCard
             key={h.id}
             hat={h}
+            index={i}
             engines={engines}
             assignedId={assignment[h.id]}
             pinnedId={pins[h.id]}
@@ -262,21 +360,23 @@ export default function App() {
         ))}
       </section>
 
-      {summaryText && (
-        <section className="summary">
-          <div className="summary__head">
-            <div className="summary__label">💙 蓝帽总结</div>
-            <button
-              className="hat-copy summary-copy"
-              onClick={() => copyText(summaryText, 'blue')}
-              title="复制蓝帽总结"
-            >
-              {copiedId === 'blue' ? '✓' : '📋'}
-            </button>
-          </div>
-          <p className="summary__text">{summaryText}</p>
-        </section>
+      {blueHat && (
+        <Synthesis
+          hat={blueHat}
+          engines={engines}
+          assignedId={assignment.blue}
+          pinnedId={pins.blue}
+          onPinChange={(hatId, engineId) => setPins((p) => ({ ...p, [hatId]: engineId }))}
+          result={results.blue}
+          summaryText={summaryText}
+          onRefresh={refreshHat}
+          canRefresh={Boolean(topic.trim()) && Boolean(assignment.blue)}
+          onCopy={copyText}
+          copiedId={copiedId}
+        />
       )}
+
+      <footer className="app-footer">Local-first · 六顶思考帽 · De Bono Six Thinking Hats</footer>
     </div>
   )
 }
