@@ -1,5 +1,5 @@
 import { EngineRegistry } from './registry.js'
-import { CLI_TABLE, makeCliEngine, whichSync } from './cli.js'
+import { CLI_TABLE, makeCliEngine, whichSync, listOpenclawAgents } from './cli.js'
 import { listOllamaModels, makeOllamaEngine } from './ollama.js'
 import { makeOpenAiEngine } from './openai.js'
 import { makeCustomEngine } from './custom.js'
@@ -7,14 +7,22 @@ import { makeCustomEngine } from './custom.js'
 export async function detectEngines(cfg, deps = {}) {
   const which = deps.which ?? whichSync
   const listOllama = deps.listOllama ?? ((d) => listOllamaModels(d))
+  const listOpenclaw = deps.listOpenclaw ?? ((d) => listOpenclawAgents(d))
   const reg = new EngineRegistry()
 
-  // Built-in CLI tools (openclaw needs an agent id → only if configured)
+  // Built-in CLI tools. openclaw needs an agent id per engine: by default we
+  // auto-detect every local agent; cfg.openclawAgent (string or array) pins it.
   for (const tool of Object.keys(CLI_TABLE)) {
     if (tool === 'openclaw') {
-      if (!cfg.openclawAgent) continue
-      const e = makeCliEngine('openclaw', { model: cfg.openclawAgent }, { which })
-      if (e) reg.add(e)
+      if (!which('openclaw')) continue
+      const configured = cfg.openclawAgent
+      const agents = Array.isArray(configured) ? configured
+        : configured ? [configured]
+        : listOpenclaw({ which })
+      for (const agent of [...new Set(agents)]) {
+        const e = makeCliEngine('openclaw', { model: agent }, { which })
+        if (e) reg.add(e)
+      }
       continue
     }
     const e = makeCliEngine(tool, {}, { which })

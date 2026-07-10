@@ -25,6 +25,24 @@ describe('detect', () => {
     const ids = reg.list().map((e) => e.id)
     expect(ids).toContain('openclaw:main')
   })
+  it('auto-detects every local openclaw agent when none is configured', async () => {
+    const cfg = { cloud: [], custom: [] }
+    const reg = await detectEngines(cfg, {
+      which: (bin) => (bin === 'openclaw' ? '/usr/bin/openclaw' : null),
+      listOllama: async () => [],
+      listOpenclaw: () => ['main', 'writer'],
+    })
+    const ids = reg.list().map((e) => e.id).sort()
+    expect(ids).toEqual(['openclaw:main', 'openclaw:writer'])
+  })
+  it('does not register openclaw when the binary is absent', async () => {
+    const reg = await detectEngines({ cloud: [], custom: [] }, {
+      which: () => null,
+      listOllama: async () => [],
+      listOpenclaw: () => ['main'],   // even if agents exist, no binary → nothing
+    })
+    expect(reg.list().some((e) => e.type === 'cli' && e.id.startsWith('openclaw'))).toBe(false)
+  })
   it('summarize groups by family', async () => {
     const cfg = { cloud: [], custom: [] }
     const reg = await detectEngines(cfg, { which: (b) => (b === 'claude' ? '/x' : null), listOllama: async () => [] })

@@ -28,6 +28,28 @@ export function whichSync(bin) {
   catch { return null }
 }
 
+// List all locally-configured openclaw agents — each becomes its own engine.
+// Real entries sit at column 0 as "- <id>"; the doctor-warning box is indented
+// (e.g. "│  - …"), so a column-0 match inside the "Agents:" section is robust.
+export function listOpenclawAgents({ which = whichSync, execImpl = execFileSync } = {}) {
+  if (!which('openclaw')) return []
+  let out = ''
+  try {
+    out = execImpl('openclaw', ['agents', 'list'], { encoding: 'utf8', timeout: 8000, stdio: ['ignore', 'pipe', 'ignore'] }).toString()
+  } catch (e) {
+    out = (e?.stdout ?? '').toString()   // openclaw may exit non-zero yet still print the list
+  }
+  const agents = []
+  let inAgents = false
+  for (const line of out.split('\n')) {
+    if (line.trim() === 'Agents:') { inAgents = true; continue }
+    if (!inAgents) continue
+    const m = line.match(/^- (\S+)/)
+    if (m) agents.push(m[1])
+  }
+  return [...new Set(agents)]
+}
+
 export function cleanOutput(raw, parse) {
   const stripped = raw.replace(ANSI, '')
   if (parse === 'openclaw-json') {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { CLI_TABLE, cleanOutput, makeCliEngine } from '../src/server/engines/cli.js'
+import { CLI_TABLE, cleanOutput, makeCliEngine, listOpenclawAgents } from '../src/server/engines/cli.js'
 
 describe('cli adapter', () => {
   it('claude builds -p prompt args', () => {
@@ -20,6 +20,28 @@ describe('cli adapter', () => {
   })
   it('openclaw buildArgs throws without a model/agent id', () => {
     expect(() => CLI_TABLE.openclaw.buildArgs('p')).toThrow('openclaw requires an agent id (model)')
+  })
+  it('listOpenclawAgents parses column-0 agent ids and ignores boxed noise', () => {
+    const out = [
+      '[state-migrations] warning',
+      '│  - Left legacy config health state in place  │',
+      'Agents:',
+      '- main (default)',
+      '  Identity: 🪕 蔡文姬 (IDENTITY.md)',
+      '- writer',
+      '  Identity: X',
+      '',
+      'Routing rules map channel/account/peer to an agent.',
+    ].join('\n')
+    const agents = listOpenclawAgents({ which: () => '/usr/bin/openclaw', execImpl: () => out })
+    expect(agents).toEqual(['main', 'writer'])
+  })
+  it('listOpenclawAgents returns [] when openclaw is not installed', () => {
+    expect(listOpenclawAgents({ which: () => null })).toEqual([])
+  })
+  it('listOpenclawAgents still parses stdout when the CLI exits non-zero', () => {
+    const throwing = () => { const e = new Error('exit 1'); e.stdout = 'Agents:\n- main (default)\n'; throw e }
+    expect(listOpenclawAgents({ which: () => '/bin/openclaw', execImpl: throwing })).toEqual(['main'])
   })
   it('makeCliEngine runs via injected spawn and returns cleaned text', async () => {
     let seenBin, seenArgs
