@@ -102,13 +102,15 @@ export default function App() {
     if (!topic.trim() || !Object.keys(assignment).length) return
     setRunning(true)
     setSummaryText('')
-    setResults(Object.fromEntries(hats.map((h) => [h.id, { status: 'speaking', engineId: assignment[h.id] }])))
+    // A manual pin overrides the last random assignment for that hat.
+    const effective = Object.fromEntries(hats.map((h) => [h.id, pins[h.id] || assignment[h.id]]))
+    setResults(Object.fromEntries(hats.map((h) => [h.id, { status: 'speaking', engineId: effective[h.id] }])))
 
     try {
       const res = await fetch('/api/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, assignment }),
+        body: JSON.stringify({ topic, assignment: effective }),
       })
       const d = await res.json()
       if (!res.ok) {
