@@ -13,6 +13,16 @@ const HAT_LABELS = {
   blue: 'Blue Hat · 综合与推进',
 }
 
+// Concise theme shown in the exported markdown, e.g. 白帽（事实与数据）.
+const HAT_THEME = {
+  white: '事实与数据',
+  red: '直觉与情绪',
+  black: '谨慎与风险',
+  yellow: '乐观与收益',
+  green: '创造与发散',
+  blue: '综合与推进',
+}
+
 // The white hat's near-white color is invisible on a light board — nudge to warm gray.
 const HAT_ACCENT = { white: '#9ca3af' }
 const accentOf = (hat) => HAT_ACCENT[hat.id] || hat.color
@@ -174,17 +184,24 @@ export default function App() {
       .catch(() => {})
   }
 
+  function engineTag(engineId) {
+    const label = engines.find((e) => e.id === engineId)?.label || engineId || ''
+    return label ? ` · ${label}` : ''
+  }
+
   function buildMarkdown() {
     const sections = []
     for (const h of hats) {
       if (h.id === 'blue') continue
       const r = results[h.id]
       if (r?.status !== 'done' || !r.text) continue
-      const engineLabel = engines.find((e) => e.id === r.engineId)?.label || r.engineId || ''
-      sections.push(`## ${h.emoji} ${h.name}（${engineLabel}）\n${r.text}`)
+      sections.push(`## ${h.emoji} ${h.name}（${HAT_THEME[h.id] || ''}）${engineTag(r.engineId)}\n${r.text}`)
     }
     let doc = `# 六顶思考帽 · ${topic}\n\n${sections.join('\n\n')}`
-    if (summaryText) doc += `\n\n## 🔵 蓝帽总结\n${summaryText}`
+    if (summaryText) {
+      const blue = hats.find((h) => h.id === 'blue')
+      doc += `\n\n## ${blue?.emoji || '🔵'} ${blue?.name || '蓝帽'}（${HAT_THEME.blue}）${engineTag(results.blue?.engineId)}\n${summaryText}`
+    }
     return doc
   }
 
@@ -226,11 +243,12 @@ export default function App() {
       }
       const next = {}
       for (const h of hats) {
+        const engineId = effective[h.id]
         if (h.id === 'blue') {
-          next[h.id] = d.summary ? { status: 'done', text: d.summary } : { status: 'error', error: d.errors?.blue || '未知错误' }
+          next[h.id] = d.summary ? { status: 'done', text: d.summary, engineId } : { status: 'error', error: d.errors?.blue || '未知错误', engineId }
         } else {
           const c = d.contributions?.find((x) => x.hatId === h.id)
-          next[h.id] = c ? { status: 'done', text: c.text } : { status: 'error', error: d.errors?.[h.id] || '未知错误' }
+          next[h.id] = c ? { status: 'done', text: c.text, engineId } : { status: 'error', error: d.errors?.[h.id] || '未知错误', engineId }
         }
       }
       setResults(next)
@@ -259,7 +277,7 @@ export default function App() {
       })
       const d = await res.json()
       if (!res.ok) { setResults((prev) => ({ ...prev, [hatId]: { status: 'error', error: d.error || '刷新失败' } })); return }
-      const next = d.text ? { status: 'done', text: d.text } : { status: 'error', error: d.error || '未知错误' }
+      const next = d.text ? { status: 'done', text: d.text, engineId } : { status: 'error', error: d.error || '未知错误', engineId }
       setResults((prev) => ({ ...prev, [hatId]: next }))
       if (hatId === 'blue' && d.text) setSummaryText(d.text)
     } catch (err) {
