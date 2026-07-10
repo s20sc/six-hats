@@ -173,6 +173,11 @@ body {
 }
 .btn--primary:hover:not(:disabled) { background: var(--primary-d); border-color: var(--primary-d); }
 
+.copy-all {
+  font-size: 0.82rem;
+  padding: 12px 16px;
+}
+
 .assign-error {
   color: var(--danger);
   font-size: 0.8rem;
@@ -241,7 +246,8 @@ body {
 .hat-status--done { color: var(--ok); }
 .hat-status--error { color: var(--danger); }
 
-.hat-refresh {
+.hat-refresh,
+.hat-copy {
   background: none;
   border: none;
   color: var(--text-3);
@@ -252,8 +258,10 @@ body {
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
 }
-.hat-refresh:hover:not(:disabled) { color: var(--text); background: var(--surface2); }
-.hat-refresh:disabled { opacity: 0.3; cursor: not-allowed; }
+.hat-refresh:hover:not(:disabled),
+.hat-copy:hover:not(:disabled) { color: var(--text); background: var(--surface2); }
+.hat-refresh:disabled,
+.hat-copy:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .hat-pin {
   display: flex;
@@ -306,6 +314,14 @@ body {
   padding: 16px 20px;
 }
 
+.summary__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .summary__label {
   font-size: 0.72rem;
   font-weight: 600;
@@ -313,8 +329,12 @@ body {
   letter-spacing: 0.1em;
   color: var(--primary);
   font-family: var(--font-mono);
-  margin-bottom: 8px;
 }
+
+.summary-copy {
+  color: var(--text-2);
+}
+.summary-copy:hover:not(:disabled) { color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
 
 .summary__text {
   font-size: 0.88rem;

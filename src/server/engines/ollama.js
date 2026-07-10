@@ -7,7 +7,7 @@ export async function listOllamaModels({ fetchImpl = fetch, baseUrl = DEFAULT_BA
     const res = await fetchImpl(`${baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) })
     if (!res.ok) return []
     const data = await res.json()
-    return (data.models ?? []).map((m) => m.name)
+    return (data.models ?? []).map((m) => m.name).filter((name) => !/embed/i.test(name))
   } catch { return [] }
 }
 
