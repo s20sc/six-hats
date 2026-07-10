@@ -16,10 +16,11 @@ export async function detectEngines(cfg, deps = {}) {
     if (tool === 'openclaw') {
       if (!which('openclaw')) continue
       const configured = cfg.openclawAgent
-      const agents = Array.isArray(configured) ? configured
+      const raw = Array.isArray(configured) ? configured
         : configured ? [configured]
-        : listOpenclaw({ which })
-      for (const agent of [...new Set(agents)]) {
+        : await listOpenclaw({ which })
+      const agents = [...new Set(raw.filter((a) => typeof a === 'string' && a.trim()).map((a) => a.trim()))]
+      for (const agent of agents) {
         const e = makeCliEngine('openclaw', { model: agent }, { which })
         if (e) reg.add(e)
       }

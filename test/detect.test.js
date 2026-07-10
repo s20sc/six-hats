@@ -35,6 +35,15 @@ describe('detect', () => {
     const ids = reg.list().map((e) => e.id).sort()
     expect(ids).toEqual(['openclaw:main', 'openclaw:writer'])
   })
+  it('ignores empty/invalid entries in a configured openclawAgent array', async () => {
+    const cfg = { cloud: [], custom: [], openclawAgent: ['main', null, '  ', 'writer', 'main'] }
+    const reg = await detectEngines(cfg, {
+      which: (bin) => (bin === 'openclaw' ? '/usr/bin/openclaw' : null),
+      listOllama: async () => [],
+    })
+    const ids = reg.list().map((e) => e.id).sort()
+    expect(ids).toEqual(['openclaw:main', 'openclaw:writer'])
+  })
   it('does not register openclaw when the binary is absent', async () => {
     const reg = await detectEngines({ cloud: [], custom: [] }, {
       which: () => null,

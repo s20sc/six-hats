@@ -20,8 +20,12 @@ export function createApp({ registry, cfg, detect } = {}) {
   let reg = registry
 
   app.get('/api/engines', async (req, res) => {
-    if (detect) { try { reg = await detect() } catch {} }
-    res.json({ engines: reg.list().map((e) => ({ id: e.id, type: e.type, label: e.label })), summary: summarize(reg) })
+    let stale = false
+    if (detect) {
+      try { reg = await detect() }
+      catch (e) { stale = true; console.warn(`[engines] live re-detect failed, serving cached list: ${e.message}`) }
+    }
+    res.json({ engines: reg.list().map((e) => ({ id: e.id, type: e.type, label: e.label })), summary: summarize(reg), stale })
   })
   app.get('/api/hats', (req, res) => res.json(hats.map(({ id, color, emoji, name }) => ({ id, color, emoji, name }))))
   app.post('/api/assign', (req, res) => {
@@ -72,7 +76,16 @@ export function createApp({ registry, cfg, detect } = {}) {
 
 export async function start() {
   const cfg = loadConfig()
-  const detect = () => detectEngines(cfg)
+  // Throttle request-path re-detection: spawning `openclaw agents list` (etc.) on
+  // every /api/engines hit is wasteful, so reuse a recent result within a short window.
+  let cached = null
+  let cachedAt = 0
+  const detect = async () => {
+    if (cached && Date.now() - cachedAt < 3000) return cached
+    cached = await detectEngines(cfg)
+    cachedAt = Date.now()
+    return cached
+  }
   const registry = await detect()
   const app = createApp({ registry, cfg, detect })
   const host = process.env.HOST || '127.0.0.1'

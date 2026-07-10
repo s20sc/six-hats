@@ -1,4 +1,4 @@
-import { spawn, execFileSync } from 'node:child_process'
+import { spawn, execFile, execFileSync } from 'node:child_process'
 import { makeEngine } from './registry.js'
 
 const ANSI = /\x1b\[[0-9;]*m/g
@@ -28,24 +28,35 @@ export function whichSync(bin) {
   catch { return null }
 }
 
+// Default runner: async so it never blocks the event loop on the request path.
+// execFile buffers stderr (no console leak) and still yields stdout on non-zero exit.
+function runOpenclawList() {
+  return new Promise((resolve) => {
+    execFile('openclaw', ['agents', 'list'], { timeout: 8000, maxBuffer: 1 << 20 }, (_err, stdout) => {
+      resolve((stdout ?? '').toString())
+    })
+  })
+}
+
 // List all locally-configured openclaw agents — each becomes its own engine.
 // Real entries sit at column 0 as "- <id>"; the doctor-warning box is indented
-// (e.g. "│  - …"), so a column-0 match inside the "Agents:" section is robust.
-export function listOpenclawAgents({ which = whichSync, execImpl = execFileSync } = {}) {
+// (e.g. "│  - …"). Parsing is bounded to the contiguous block under "Agents:" so a
+// later section's column-0 bullet (routing rules, channels) is never mistaken for an agent.
+export async function listOpenclawAgents({ which = whichSync, execImpl = runOpenclawList } = {}) {
   if (!which('openclaw')) return []
   let out = ''
-  try {
-    out = execImpl('openclaw', ['agents', 'list'], { encoding: 'utf8', timeout: 8000, stdio: ['ignore', 'pipe', 'ignore'] }).toString()
-  } catch (e) {
-    out = (e?.stdout ?? '').toString()   // openclaw may exit non-zero yet still print the list
-  }
+  try { out = await execImpl() } catch (e) { out = (e?.stdout ?? '').toString() }
+  out = (out ?? '').toString()
+
   const agents = []
   let inAgents = false
   for (const line of out.split('\n')) {
     if (line.trim() === 'Agents:') { inAgents = true; continue }
     if (!inAgents) continue
     const m = line.match(/^- (\S+)/)
-    if (m) agents.push(m[1])
+    if (m) { agents.push(m[1]); continue }
+    if (line.trim() === '' || /^\s/.test(line)) continue // blank or indented detail → still in block
+    break // a column-0 non-agent line begins the next section
   }
   return [...new Set(agents)]
 }

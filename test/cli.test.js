@@ -21,7 +21,7 @@ describe('cli adapter', () => {
   it('openclaw buildArgs throws without a model/agent id', () => {
     expect(() => CLI_TABLE.openclaw.buildArgs('p')).toThrow('openclaw requires an agent id (model)')
   })
-  it('listOpenclawAgents parses column-0 agent ids and ignores boxed noise', () => {
+  it('listOpenclawAgents parses column-0 agent ids and ignores boxed noise', async () => {
     const out = [
       '[state-migrations] warning',
       '│  - Left legacy config health state in place  │',
@@ -33,15 +33,29 @@ describe('cli adapter', () => {
       '',
       'Routing rules map channel/account/peer to an agent.',
     ].join('\n')
-    const agents = listOpenclawAgents({ which: () => '/usr/bin/openclaw', execImpl: () => out })
+    const agents = await listOpenclawAgents({ which: () => '/usr/bin/openclaw', execImpl: () => out })
     expect(agents).toEqual(['main', 'writer'])
   })
-  it('listOpenclawAgents returns [] when openclaw is not installed', () => {
-    expect(listOpenclawAgents({ which: () => null })).toEqual([])
+  it('listOpenclawAgents stops at the next section (does not read later "- " bullets)', async () => {
+    const out = [
+      'Agents:',
+      '- main (default)',
+      '  Identity: X',
+      '- writer',
+      '',
+      'Channels:',
+      '- slack (not an agent!)',
+      '- feishu (not an agent!)',
+    ].join('\n')
+    const agents = await listOpenclawAgents({ which: () => '/x/openclaw', execImpl: () => out })
+    expect(agents).toEqual(['main', 'writer'])
   })
-  it('listOpenclawAgents still parses stdout when the CLI exits non-zero', () => {
+  it('listOpenclawAgents returns [] when openclaw is not installed', async () => {
+    expect(await listOpenclawAgents({ which: () => null })).toEqual([])
+  })
+  it('listOpenclawAgents still parses stdout when the CLI exits non-zero', async () => {
     const throwing = () => { const e = new Error('exit 1'); e.stdout = 'Agents:\n- main (default)\n'; throw e }
-    expect(listOpenclawAgents({ which: () => '/bin/openclaw', execImpl: throwing })).toEqual(['main'])
+    expect(await listOpenclawAgents({ which: () => '/bin/openclaw', execImpl: throwing })).toEqual(['main'])
   })
   it('makeCliEngine runs via injected spawn and returns cleaned text', async () => {
     let seenBin, seenArgs
