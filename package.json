@@ -1,8 +1,13 @@
 {
-  "name": "six-hats-v2",
+  "name": "six-hats",
+  "description": "A local-first Six Thinking Hats deliberation board powered by an auto-detected pool of local and cloud AI engines.",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -12,9 +17,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

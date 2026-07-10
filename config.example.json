@@ -1,0 +1,10 @@
+{
+  "port": 3002,
+  "cloud": [
+    { "id": "openai", "label": "OpenAI", "baseUrl": "https://api.openai.com/v1", "apiKeyEnv": "OPENAI_API_KEY", "models": ["gpt-4o-mini"] },
+    { "id": "openrouter", "label": "OpenRouter", "baseUrl": "https://openrouter.ai/api/v1", "apiKeyEnv": "OPENROUTER_API_KEY", "models": ["anthropic/claude-3.5-sonnet"] }
+  ],
+  "custom": [],
+  "skins": {},
+  "openclawAgent": null
+}
