@@ -39,3 +39,8 @@ export async function runDeliberation({ topic, hats, registry, assignment, onUpd
   }
   return { contributions: ordered, summary, errors }
 }
+
+export async function runSingleHat({ topic, hat, engine, contributions = [] }) {
+  const prompt = hat.id === 'blue' ? bluePrompt(topic, contributions) : hatPrompt(hat, topic)
+  return engine.run(prompt)
+}

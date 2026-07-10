@@ -22,7 +22,7 @@ export function makeOllamaEngine(model, { baseUrl = DEFAULT_BASE, fetchImpl = fe
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], stream: false }),
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(120000),
       })
       if (!res.ok) throw new Error(`ollama ${model} HTTP ${res.status}`)
       const data = await res.json()

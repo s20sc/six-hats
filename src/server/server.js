@@ -8,7 +8,7 @@ import { stateFile } from './paths.js'
 import { detectEngines, summarize } from './engines/detect.js'
 import { HATS, applySkin, applyPromptOverrides } from './hats.js'
 import { assignEngines } from './assign.js'
-import { runDeliberation } from './orchestrate.js'
+import { runDeliberation, runSingleHat } from './orchestrate.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -36,6 +36,24 @@ export function createApp({ registry, cfg }) {
       const result = await runDeliberation({ topic, hats, registry, assignment })
       try { fs.writeFileSync(stateFile(), JSON.stringify({ topic, ...result }, null, 2)) } catch {}
       res.json(result)
+    } catch (e) {
+      res.status(500).json({ error: e.message })
+    }
+  })
+  app.post('/api/run-hat', async (req, res) => {
+    try {
+      const { topic, hatId, engineId, contributions = [] } = req.body ?? {}
+      if (!topic || !hatId || !engineId) return res.status(400).json({ error: 'missing topic/hatId/engineId' })
+      const hat = hats.find((h) => h.id === hatId)
+      if (!hat) return res.status(400).json({ error: `unknown hat: ${hatId}` })
+      const engine = registry.get(engineId)
+      if (!engine) return res.status(400).json({ error: `unknown engine: ${engineId}` })
+      try {
+        const text = await runSingleHat({ topic, hat, engine, contributions })
+        res.json({ hatId, text })
+      } catch (e) {
+        res.json({ hatId, error: e.message })
+      }
     } catch (e) {
       res.status(500).json({ error: e.message })
     }

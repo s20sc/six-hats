@@ -241,6 +241,20 @@ body {
 .hat-status--done { color: var(--ok); }
 .hat-status--error { color: var(--danger); }
 
+.hat-refresh {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 0.82rem;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.hat-refresh:hover:not(:disabled) { color: var(--text); background: var(--surface2); }
+.hat-refresh:disabled { opacity: 0.3; cursor: not-allowed; }
+
 .hat-pin {
   display: flex;
   align-items: center;

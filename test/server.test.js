@@ -39,4 +39,17 @@ describe('server routes', () => {
     expect(res.status).toBe(400)
     expect(res.body.error).toMatch(/nope/)
   })
+  it('POST /api/run-hat returns a single hat text', async () => {
+    const app = createApp({ registry: reg(), cfg })
+    const res = await call(app, 'post', '/api/run-hat', { topic: 'T', hatId: 'white', engineId: 'e', contributions: [] })
+    expect(res.status).toBe(200)
+    expect(res.body.hatId).toBe('white')
+    expect(res.body.text).toBe('op')
+  })
+  it('POST /api/run-hat 400s on unknown engineId', async () => {
+    const app = createApp({ registry: reg(), cfg })
+    const res = await call(app, 'post', '/api/run-hat', { topic: 'T', hatId: 'white', engineId: 'nope', contributions: [] })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/nope/)
+  })
 })
