@@ -52,15 +52,23 @@ body {
 .topbar__title { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
 .topbar__title em { font-style: normal; font-weight: 600; color: var(--ink-3); font-size: 0.92rem; }
 
-.topbar__right { display: flex; align-items: center; gap: 16px; }
-.avatars { display: flex; }
-.avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  border: 2px solid var(--ink); margin-left: -8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.78rem; font-weight: 800; color: #fff;
+.topbar__right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.engine-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.engine-chips__label {
+  font-size: 0.64rem; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-3);
 }
-.avatar:first-child { margin-left: 0; }
+.engine-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fff; color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 20px;
+  padding: 3px 11px 3px 8px;
+  font-size: 0.74rem; font-weight: 700; white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+.engine-chip__dot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--ink); flex: none; }
+.engine-chip--none { color: var(--ink-3); font-weight: 600; }
 
 .btn-share {
   background: #3b82f6; color: #fff;

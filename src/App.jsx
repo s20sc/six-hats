@@ -284,12 +284,18 @@ export default function App() {
           <span className="topbar__title">Six&nbsp;Hats <em>· AI 联席脑暴看板</em></span>
         </div>
         <div className="topbar__right">
-          <div className="avatars" title="在场引擎">
-            {engines.slice(0, 6).map((e, i) => (
-              <span key={e.id} className="avatar" style={{ background: AVATAR_TONES[i % AVATAR_TONES.length] }} title={e.label}>
-                {(e.label || e.id).replace(/^\W+/, '').charAt(0).toUpperCase()}
-              </span>
-            ))}
+          <div className="engine-chips" title="在场引擎">
+            <span className="engine-chips__label">在场引擎</span>
+            {engines.length === 0 ? (
+              <span className="engine-chip engine-chip--none">未检测到引擎</span>
+            ) : (
+              engines.map((e, i) => (
+                <span key={e.id} className="engine-chip" title={e.id}>
+                  <span className="engine-chip__dot" style={{ background: AVATAR_TONES[i % AVATAR_TONES.length] }} />
+                  {e.label}
+                </span>
+              ))
+            )}
           </div>
           <button className="btn-share" onClick={() => copyText(buildMarkdown(), 'all')} disabled={!canCopyAll}>
             {copiedId === 'all' ? '已复制 ✓' : '分享看板'}
