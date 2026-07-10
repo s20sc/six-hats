@@ -1,10 +1,12 @@
 **English** | [中文](README.zh-CN.md)
 
+<p align="center">
+  <img src="pics/banner.png" alt="Six Hats — local-first multi-model deliberation" width="100%">
+</p>
+
 # Six Hats
 
 A local-first deliberation board built on Edward de Bono's Six Thinking Hats method — six AI personas debate your topic from six angles, then one of them synthesizes the discussion into a conclusion.
-
-_Screenshot coming soon._
 
 ## What it is
 

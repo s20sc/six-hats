@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0c0c0e"/>
+      <stop offset="50%" stop-color="#08080a"/>
+      <stop offset="100%" stop-color="#040405"/>
+    </linearGradient>
+
+    <!-- Ambient Glows -->
+    <radialGradient id="ambient-left" cx="20%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ambient-right" cx="80%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-opacity="0.02" stroke-width="1"/>
+    </pattern>
+
+    <!-- Title Gradient -->
+    <linearGradient id="text-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d4d4d8"/>
+    </linearGradient>
+
+    <!-- Connecting Line Gradient -->
+    <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="20%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.2"/>
+      <stop offset="80%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Sphere Glow Gradients -->
+    <radialGradient id="glow-white" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-red" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f87171" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-black" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#9ca3af" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#9ca3af" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-yellow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#facc15" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#facc15" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-green" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4ade80" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-blue" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 3D Sphere Shading Gradients -->
+    <radialGradient id="sphere-white" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#e5e7eb"/>
+      <stop offset="100%" stop-color="#9ca3af"/>
+    </radialGradient>
+    <radialGradient id="sphere-red" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#fca5a5"/>
+      <stop offset="50%" stop-color="#f87171"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </radialGradient>
+    <radialGradient id="sphere-black" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#6b7280"/>
+      <stop offset="50%" stop-color="#374151"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </radialGradient>
+    <radialGradient id="sphere-yellow" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#a16207"/>
+    </radialGradient>
+    <radialGradient id="sphere-green" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#bbf7d0"/>
+      <stop offset="50%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </radialGradient>
+    <radialGradient id="sphere-blue" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#bfdbfe"/>
+      <stop offset="50%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1280" height="320" fill="url(#bg-grad)"/>
+  <rect width="1280" height="320" fill="url(#ambient-left)"/>
+  <rect width="1280" height="320" fill="url(#ambient-right)"/>
+  <rect width="1280" height="320" fill="url(#grid)"/>
+
+  <!-- Technical HUD Border & Corner Accents -->
+  <path d="M 30,50 L 30,30 L 50,30" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1.5" fill="none"/>
+  <path d="M 1250,50 L 1250,30 L 1230,30" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1.5" fill="none"/>
+  <path d="M 30,270 L 30,290 L 50,290" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1.5" fill="none"/>
+  <path d="M 1250,270 L 1250,290 L 1230,290" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1.5" fill="none"/>
+  <line x1="0" y1="0" x2="1280" y2="0" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1"/>
+  <line x1="0" y1="320" x2="1280" y2="320" stroke="#ffffff" stroke-opacity="0.04" stroke-width="1"/>
+
+  <!-- HUD Side Information (Left) -->
+  <g transform="translate(60, 80)" opacity="0.25">
+    <text x="0" y="0" font-family="system-ui, -apple-system, monospace" font-size="10" font-weight="700" fill="#ffffff" letter-spacing="1.5">SYS.INIT // LOCAL_FIRST</text>
+    <text x="0" y="16" font-family="system-ui, -apple-system, monospace" font-size="9" fill="#a1a1aa" letter-spacing="1">ENGINES: CLI · OLLAMA · CLOUD</text>
+  </g>
+
+  <!-- HUD Side Information (Right) -->
+  <g transform="translate(1220, 80)" opacity="0.25" text-anchor="end">
+    <text x="0" y="0" font-family="system-ui, -apple-system, monospace" font-size="10" font-weight="700" fill="#ffffff" letter-spacing="1.5">ENGINE // MULTI_MODEL</text>
+    <text x="0" y="16" font-family="system-ui, -apple-system, monospace" font-size="9" fill="#a1a1aa" letter-spacing="1">STATUS: OPERATIONAL</text>
+  </g>
+
+  <!-- Central Schematic Track -->
+  <path d="M 360,95 L 920,95" stroke="url(#line-grad)" stroke-width="1.5"/>
+
+  <!-- 1. White Hat Sphere Section -->
+  <g>
+    <line x1="440" y1="65" x2="440" y2="125" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="2,4"/>
+    <circle cx="440" cy="95" r="55" fill="url(#glow-white)"/>
+    <circle cx="440" cy="95" r="16" fill="url(#sphere-white)"/>
+    <text x="440" y="142" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" fill="#ffffff" opacity="0.35" letter-spacing="1.5">FACTS</text>
+  </g>
+
+  <!-- 2. Red Hat Sphere Section -->
+  <g>
+    <line x1="520" y1="65" x2="520" y2="125" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="2,4"/>
+    <circle cx="520" cy="95" r="55" fill="url(#glow-red)"/>
+    <circle cx="520" cy="95" r="16" fill="url(#sphere-red)"/>
+    <text x="520" y="142" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" fill="#ffffff" opacity="0.35" letter-spacing="1.5">FEELINGS</text>
+  </g>
+
+  <!-- 3. Black Hat Sphere Section -->
+  <g>
+    <line x1="600" y1="65" x2="600" y2="125" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="2,4"/>
+    <circle cx="600" cy="95" r="55" fill="url(#glow-black)"/>
+    <circle cx="600" cy="95" r="16" fill="url(#sphere-black)" stroke="#4b5563" stroke-width="1"/>
+    <text x="600" y="142" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" fill="#ffffff" opacity="0.35" letter-spacing="1.5">CAUTION</text>
+  </g>
+
+  <!-- 4. Yellow Hat Sphere Section -->
+  <g>
+    <line x1="680" y1="65" x2="680" y2="125" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="2,4"/>
+    <circle cx="680" cy="95" r="55" fill="url(#glow-yellow)"/>
+    <circle cx="680" cy="95" r="16" fill="url(#sphere-yellow)"/>
+    <text x="680" y="142" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" fill="#ffffff" opacity="0.35" letter-spacing="1.5">OPTIMISM</text>
+  </g>
+
+  <!-- 5. Green Hat Sphere Section -->
+  <g>
+    <line x1="760" y1="65" x2="760" y2="125" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="2,4"/>
+    <circle cx="760" cy="95" r="55" fill="url(#glow-green)"/>
+    <circle cx="760" cy="95" r="16" fill="url(#sphere-green)"/>
+    <text x="760" y="142" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" fill="#ffffff" opacity="0.35" letter-spacing="1.5">CREATIVITY</text>
+  </g>
+
+  <!-- 6. Blue Hat Sphere Section -->
+  <g>
+    <line x1="840" y1="65" x2="840" y2="125" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="2,4"/>
+    <circle cx="840" cy="95" r="55" fill="url(#glow-blue)"/>
+    <circle cx="840" cy="95" r="16" fill="url(#sphere-blue)"/>
+    <text x="840" y="142" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" fill="#ffffff" opacity="0.35" letter-spacing="1.5">CONTROL</text>
+  </g>
+
+  <!-- Typography -->
+  <text x="640" y="218" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="44" font-weight="800" fill="url(#text-grad)" letter-spacing="8">SIX HATS</text>
+  
+  <text x="640" y="258" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#a1a1aa" letter-spacing="1.8">
+    六顶思考帽 <tspan fill="#52525b" font-weight="700">·</tspan> <tspan fill="#d4d4d8">local-first multi-model deliberation</tspan>
+  </text>
+</svg>

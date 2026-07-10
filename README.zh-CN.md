@@ -1,10 +1,12 @@
 [English](README.md) | **中文**
 
+<p align="center">
+  <img src="pics/banner.png" alt="Six Hats — 本地优先的多模型六顶思考帽议事板" width="100%">
+</p>
+
 # Six Hats
 
 一个基于爱德华·德博诺（Edward de Bono）六顶思考帽方法的本地优先协作看板 —— 六个 AI 角色从六个不同角度就你的话题展开讨论，最后由其中一个角色综合归纳出结论。
-
-_截图即将添加。_
 
 ## 这是什么
 
