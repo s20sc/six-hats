@@ -22,9 +22,10 @@ function EnginePanel({ summary }) {
   )
 }
 
-function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRefresh, canRefresh }) {
+function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRefresh, canRefresh, onCopy, copiedId }) {
   const status = result?.status ?? 'idle'
   const assignedEngine = engines.find((e) => e.id === assignedId)
+  const canCopy = Boolean(result?.text)
 
   return (
     <div className={`hat hat--${status}`} style={{ '--hat-color': hat.color }}>
@@ -32,6 +33,14 @@ function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRe
         <span className="hat-emoji">{hat.emoji}</span>
         <span className="hat-name">{hat.name}</span>
         <span className={`hat-status hat-status--${status}`}>{STATUS_LABELS[status]}</span>
+        <button
+          className="hat-copy"
+          onClick={() => onCopy(result?.text, hat.id)}
+          disabled={!canCopy}
+          title="复制这一顶帽子的内容"
+        >
+          {copiedId === hat.id ? '✓' : '📋'}
+        </button>
         <button
           className="hat-refresh"
           onClick={() => onRefresh(hat.id)}
@@ -76,6 +85,29 @@ export default function App() {
   const [results, setResults] = useState({})
   const [summaryText, setSummaryText] = useState('')
   const [running, setRunning] = useState(false)
+  const [copiedId, setCopiedId] = useState(null)
+
+  function copyText(text, id) {
+    navigator.clipboard.writeText(text)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 1500)
+  }
+
+  function buildMarkdown() {
+    const sections = []
+    for (const h of hats) {
+      if (h.id === 'blue') continue
+      const r = results[h.id]
+      if (r?.status !== 'done' || !r.text) continue
+      const engineLabel = engines.find((e) => e.id === r.engineId)?.label || r.engineId || ''
+      sections.push(`## ${h.emoji} ${h.name}（${engineLabel}）\n${r.text}`)
+    }
+    let doc = `# 六顶思考帽 · ${topic}\n\n${sections.join('\n\n')}`
+    if (summaryText) {
+      doc += `\n\n## 🔵 蓝帽总结\n${summaryText}`
+    }
+    return doc
+  }
 
   useEffect(() => {
     fetch('/api/engines').then((r) => r.json()).then((d) => { setEngines(d.engines); setSummary(d.summary) })
@@ -173,6 +205,7 @@ export default function App() {
 
   const canAssign = engines.length > 0
   const canRun = !running && topic.trim() && Object.keys(assignment).length > 0
+  const canCopyAll = hats.some((h) => results[h.id]?.status === 'done' && results[h.id]?.text)
 
   return (
     <div className="app">
@@ -196,6 +229,13 @@ export default function App() {
         <button className="btn btn--primary" onClick={run} disabled={!canRun}>
           {running ? '思考中…' : '开始'}
         </button>
+        <button
+          className="btn copy-all"
+          onClick={() => copyText(buildMarkdown(), 'all')}
+          disabled={!canCopyAll}
+        >
+          {copiedId === 'all' ? '✓ 已复制' : '复制全部'}
+        </button>
       </section>
 
       {assignError && <div className="assign-error">⚠ {assignError}</div>}
@@ -212,13 +252,24 @@ export default function App() {
             result={results[h.id]}
             onRefresh={refreshHat}
             canRefresh={Boolean(topic.trim()) && Boolean(assignment[h.id])}
+            onCopy={copyText}
+            copiedId={copiedId}
           />
         ))}
       </section>
 
       {summaryText && (
         <section className="summary">
-          <div className="summary__label">💙 蓝帽总结</div>
+          <div className="summary__head">
+            <div className="summary__label">💙 蓝帽总结</div>
+            <button
+              className="hat-copy summary-copy"
+              onClick={() => copyText(summaryText, 'blue')}
+              title="复制蓝帽总结"
+            >
+              {copiedId === 'blue' ? '✓' : '📋'}
+            </button>
+          </div>
           <p className="summary__text">{summaryText}</p>
         </section>
       )}

@@ -8,6 +8,12 @@ describe('ollama adapter', () => {
     const models = await listOllamaModels({ fetchImpl: okFetch({ models: [{ name: 'qwen2.5' }, { name: 'llama3' }] }) })
     expect(models).toEqual(['qwen2.5', 'llama3'])
   })
+  it('filters out embedding models', async () => {
+    const models = await listOllamaModels({
+      fetchImpl: okFetch({ models: [{ name: 'qwen2.5' }, { name: 'nomic-embed-text' }, { name: 'llama3' }] }),
+    })
+    expect(models).toEqual(['qwen2.5', 'llama3'])
+  })
   it('returns [] when unreachable', async () => {
     const models = await listOllamaModels({ fetchImpl: async () => { throw new Error('econnrefused') } })
     expect(models).toEqual([])
