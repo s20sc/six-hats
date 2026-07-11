@@ -65,29 +65,36 @@ function StickyNote({ note, storageKey }) {
   const key = storageKey ? `sixhats.sticky.${storageKey}` : null
   const [pos, setPos] = useState(() => {
     if (!key) return { dx: 0, dy: 0 }
-    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : { dx: 0, dy: 0 } } catch { return { dx: 0, dy: 0 } }
+    try {
+      const v = JSON.parse(localStorage.getItem(key))
+      if (v && Number.isFinite(v.dx) && Number.isFinite(v.dy)) return { dx: v.dx, dy: v.dy }
+    } catch {}
+    return { dx: 0, dy: 0 }
   })
   const dragRef = useRef(null)
-  const posRef = useRef(pos)
-  posRef.current = pos
   if (!note) return null
   const rot = note.rot ?? 0
 
+  const posFromEvent = (e) => {
+    const d = dragRef.current
+    return { dx: d.dx + (e.clientX - d.sx), dy: d.dy + (e.clientY - d.sy) }
+  }
   function down(e) {
     e.preventDefault()
     try { e.currentTarget.setPointerCapture(e.pointerId) } catch {}
     dragRef.current = { sx: e.clientX, sy: e.clientY, dx: pos.dx, dy: pos.dy }
   }
   function move(e) {
-    const d = dragRef.current
-    if (!d) return
-    setPos({ dx: d.dx + (e.clientX - d.sx), dy: d.dy + (e.clientY - d.sy) })
+    if (!dragRef.current) return
+    setPos(posFromEvent(e))
   }
   function up(e) {
     if (!dragRef.current) return
+    const final = posFromEvent(e) // from the event, never a stale render
     dragRef.current = null
     try { e.currentTarget.releasePointerCapture(e.pointerId) } catch {}
-    if (key) { try { localStorage.setItem(key, JSON.stringify(posRef.current)) } catch {} }
+    setPos(final)
+    if (key) { try { localStorage.setItem(key, JSON.stringify(final)) } catch {} }
   }
 
   const cls = note.sticker ? `sticker sticker--${note.tone}` : `sticky-note sticky--${note.tone} sticky--${note.pos}`
