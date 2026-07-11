@@ -5,8 +5,8 @@ describe('cli adapter', () => {
   it('claude builds -p prompt args', () => {
     expect(CLI_TABLE.claude.buildArgs('hello')).toEqual(['-p', 'hello'])
   })
-  it('codex builds exec prompt args', () => {
-    expect(CLI_TABLE.codex.buildArgs('hi')).toEqual(['exec', 'hi'])
+  it('codex builds exec args with the git-repo-check skip + read-only sandbox', () => {
+    expect(CLI_TABLE.codex.buildArgs('hi')).toEqual(['exec', '--skip-git-repo-check', '-s', 'read-only', 'hi'])
   })
   it('hermes adds -m when model given', () => {
     expect(CLI_TABLE.hermes.buildArgs('q', 'gpt-4o')).toEqual(['-z', 'q', '-m', 'gpt-4o'])

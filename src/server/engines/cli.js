@@ -17,7 +17,9 @@ export function stripLeadingNoise(text) {
 
 export const CLI_TABLE = {
   claude:   { bin: 'claude',   buildArgs: (p) => ['-p', p],                              parse: 'raw' },
-  codex:    { bin: 'codex',    buildArgs: (p) => ['exec', p],                            parse: 'raw' },
+  // --skip-git-repo-check: `codex exec` otherwise refuses outside a trusted git dir
+  // (the packaged app runs from '/'); read-only sandbox: it only needs to answer, not edit.
+  codex:    { bin: 'codex',    buildArgs: (p) => ['exec', '--skip-git-repo-check', '-s', 'read-only', p], parse: 'raw' },
   agy:      { bin: 'agy',      buildArgs: (p) => ['-p', p],                              parse: 'raw' },
   hermes:   { bin: 'hermes',   buildArgs: (p, m) => (m ? ['-z', p, '-m', m] : ['-z', p]), parse: 'raw' },
   openclaw: { bin: 'openclaw', buildArgs: (p, m) => { if (!m) throw new Error('openclaw requires an agent id (model)'); return ['agent', '--agent', m, '--message', p, '--json'] }, parse: 'openclaw-json' },
