@@ -8,6 +8,14 @@ describe('config', () => {
     const cfg = loadConfig({ env: {}, fileJson: null })
     expect(cfg.port).toBe(3002)
   })
+  it('honors an explicit PORT, including 0 for OS-assigned ephemeral', () => {
+    expect(loadConfig({ env: { PORT: '0' }, fileJson: null }).port).toBe(0)
+    expect(loadConfig({ env: { PORT: '4321' }, fileJson: null }).port).toBe(4321)
+  })
+  it('falls back past an empty PORT to config then 3002', () => {
+    expect(loadConfig({ env: { PORT: '' }, fileJson: { port: 5000 } }).port).toBe(5000)
+    expect(loadConfig({ env: { PORT: '' }, fileJson: null }).port).toBe(3002)
+  })
   it('registers a cloud endpoint only when its key is present', () => {
     const fileJson = { cloud: [{ id: 'openai', label: 'OpenAI', baseUrl: 'https://api.openai.com/v1', apiKeyEnv: 'OPENAI_API_KEY', models: ['gpt-4o'] }] }
     const withKey = loadConfig({ env: { OPENAI_API_KEY: 'sk-x' }, fileJson })

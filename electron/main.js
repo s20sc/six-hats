@@ -2,7 +2,6 @@ import { app, BrowserWindow, Tray, Menu, nativeImage, shell, dialog } from 'elec
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { execFileSync } from 'node:child_process'
-import net from 'node:net'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
@@ -25,21 +24,14 @@ function resolvePath() {
 }
 process.env.PATH = resolvePath()
 
-function freePort() {
-  return new Promise((resolve, reject) => {
-    const srv = net.createServer()
-    srv.on('error', reject)
-    srv.listen(0, '127.0.0.1', () => { const { port } = srv.address(); srv.close(() => resolve(port)) })
-  })
-}
-
 let mainWindow = null
 let tray = null
 let serverInfo = null
 
 async function startServer() {
-  const port = await freePort()
-  process.env.PORT = String(port)
+  // PORT=0 → the OS assigns a free port atomically at bind time (no pick/release race);
+  // start() resolves with the actually-bound port.
+  process.env.PORT = '0'
   process.env.HOST = '127.0.0.1'
   const { start } = await import(join(ROOT, 'src/server/server.js'))
   serverInfo = await start()

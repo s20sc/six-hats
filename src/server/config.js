@@ -11,8 +11,10 @@ export function loadConfig({ env = process.env, fileJson } = {}) {
   const cloud = cloudRaw
     .map((c) => ({ id: c.id, label: c.label ?? c.id, baseUrl: c.baseUrl, apiKey: env[c.apiKeyEnv] ?? '', models: c.models ?? [] }))
     .filter((c) => c.apiKey && c.baseUrl)
+  const envPort = env.PORT !== undefined && env.PORT !== '' ? Number(env.PORT) : NaN
   return {
-    port: Number(env.PORT) || file?.port || 3002,
+    // honor an explicit PORT (including 0 = OS-assigned ephemeral); else config, else 3002
+    port: Number.isFinite(envPort) ? envPort : (file?.port ?? 3002),
     cloud,
     custom: file?.custom ?? [],
     skins: file?.skins ?? {},

@@ -89,12 +89,13 @@ export async function start() {
   const registry = await detect()
   const app = createApp({ registry, cfg, detect })
   const host = process.env.HOST || '127.0.0.1'
-  return await new Promise((resolve) => {
+  return await new Promise((resolve, reject) => {
     const server = app.listen(cfg.port, host, () => {
       const port = server.address().port
       console.log(`Six Hats running on http://${host}:${port}`)
       resolve({ server, host, port })
     })
+    server.on('error', reject) // surface EADDRINUSE / bad host instead of hanging
   })
 }
 
