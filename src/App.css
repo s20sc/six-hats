@@ -252,6 +252,8 @@ body {
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 940px) {
   .canvas { grid-template-columns: repeat(2, 1fr); }
+  /* the grid reflows so bottom-hanging notes would land on the next card — drop the decoration */
+  .sticky-note, .sticker { display: none; }
 }
 @media (max-width: 620px) {
   .canvas { grid-template-columns: 1fr; }

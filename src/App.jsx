@@ -124,7 +124,6 @@ export default function App() {
   const [assignError, setAssignError] = useState('')
   const [topic, setTopic] = useState('')
   const [results, setResults] = useState({})
-  const [summaryText, setSummaryText] = useState('')
   const [running, setRunning] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
 
@@ -149,9 +148,10 @@ export default function App() {
       sections.push(`## ${h.emoji} ${h.name}（${HAT_THEME[h.id] || ''}）${engineTag(r.engineId)}\n${r.text}`)
     }
     let doc = `# 六顶思考帽 · ${topic}\n\n${sections.join('\n\n')}`
-    if (summaryText) {
+    const blueR = results.blue
+    if (blueR?.status === 'done' && blueR.text) {
       const blue = hats.find((h) => h.id === 'blue')
-      doc += `\n\n## ${blue?.emoji || '🔵'} ${blue?.name || '蓝帽'}（${HAT_THEME.blue}）${engineTag(results.blue?.engineId)}\n${summaryText}`
+      doc += `\n\n## ${blue?.emoji || '🔵'} ${blue?.name || '蓝帽'}（${HAT_THEME.blue}）${engineTag(blueR.engineId)}\n${blueR.text}`
     }
     return doc
   }
@@ -177,7 +177,6 @@ export default function App() {
   async function run() {
     if (!topic.trim() || !Object.keys(assignment).length) return
     setRunning(true)
-    setSummaryText('')
     const effective = Object.fromEntries(hats.map((h) => [h.id, pins[h.id] || assignment[h.id]]))
     setResults(Object.fromEntries(hats.map((h) => [h.id, { status: 'speaking', engineId: effective[h.id] }])))
 
@@ -189,7 +188,6 @@ export default function App() {
       const d = await res.json()
       if (!res.ok) {
         setResults(Object.fromEntries(hats.map((h) => [h.id, { status: 'error', error: d.error || '运行失败' }])))
-        setSummaryText('')
         return
       }
       const next = {}
@@ -203,7 +201,6 @@ export default function App() {
         }
       }
       setResults(next)
-      setSummaryText(d.summary || '')
     } catch (err) {
       setResults(Object.fromEntries(hats.map((h) => [h.id, { status: 'error', error: err.message }])))
     } finally { setRunning(false) }
@@ -230,7 +227,6 @@ export default function App() {
       if (!res.ok) { setResults((prev) => ({ ...prev, [hatId]: { status: 'error', error: d.error || '刷新失败' } })); return }
       const next = d.text ? { status: 'done', text: d.text, engineId } : { status: 'error', error: d.error || '未知错误', engineId }
       setResults((prev) => ({ ...prev, [hatId]: next }))
-      if (hatId === 'blue' && d.text) setSummaryText(d.text)
     } catch (err) {
       setResults((prev) => ({ ...prev, [hatId]: { status: 'error', error: err.message } }))
     }
