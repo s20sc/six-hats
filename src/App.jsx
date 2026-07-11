@@ -38,6 +38,16 @@ const STICKY = {
 
 const AVATAR_TONES = ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444']
 
+// OpenAI-compatible (/chat/completions) cloud providers — enter a key, no CLI needed.
+const CLOUD_PRESETS = [
+  { label: 'OpenAI', baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  { label: 'OpenRouter', baseUrl: 'https://openrouter.ai/api/v1', model: 'anthropic/claude-3.5-sonnet' },
+  { label: 'DeepSeek', baseUrl: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+  { label: 'Kimi (Moonshot)', baseUrl: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-8k' },
+  { label: '智谱 GLM', baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-flash' },
+  { label: '自定义', baseUrl: '', model: '' },
+]
+
 /* ── Inline icons ────────────────────────────────────────────────── */
 function IconCopy() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>
@@ -53,6 +63,71 @@ function IconShuffle() {
 }
 function IconPlay() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M6 4l14 8-14 8z" /></svg>
+}
+function IconGear() {
+  return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+}
+function IconClose() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+}
+
+function CloudSettings({ open, onClose, providers, onAdd, onRemove }) {
+  const [preset, setPreset] = useState(0)
+  const [form, setForm] = useState({ label: CLOUD_PRESETS[0].label, baseUrl: CLOUD_PRESETS[0].baseUrl, apiKey: '', model: CLOUD_PRESETS[0].model })
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+  if (!open) return null
+
+  function pick(i) {
+    setPreset(i)
+    const p = CLOUD_PRESETS[i]
+    setForm((f) => ({ ...f, label: p.label === '自定义' ? '' : p.label, baseUrl: p.baseUrl, model: p.model }))
+  }
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+  async function submit() {
+    setErr(''); setBusy(true)
+    try { await onAdd(form); setForm((f) => ({ ...f, apiKey: '' })) }
+    catch (e) { setErr(e.message) }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <h2>云引擎</h2>
+          <button className="tool" onClick={onClose} title="关闭"><IconClose /></button>
+        </div>
+        <p className="modal-hint">填入 API Key 即可使用云端模型，<b>无需安装任何 CLI</b>。密钥仅本地明文保存在 <code>~/.six-hats/cloud.json</code>。</p>
+        <div className="cloud-form">
+          <label className="field"><span>服务商</span>
+            <select value={preset} onChange={(e) => pick(Number(e.target.value))}>
+              {CLOUD_PRESETS.map((p, i) => <option key={i} value={i}>{p.label}</option>)}
+            </select>
+          </label>
+          <label className="field"><span>名称</span><input value={form.label} onChange={set('label')} placeholder="OpenAI" /></label>
+          <label className="field"><span>Base URL</span><input value={form.baseUrl} onChange={set('baseUrl')} placeholder="https://api.openai.com/v1" /></label>
+          <label className="field"><span>模型</span><input value={form.model} onChange={set('model')} placeholder="gpt-4o-mini" /></label>
+          <label className="field"><span>API Key</span><input type="password" value={form.apiKey} onChange={set('apiKey')} placeholder="sk-…" autoComplete="off" /></label>
+          {err && <div className="cloud-err">⚠ {err}</div>}
+          <button className="nbtn nbtn--primary cloud-add" onClick={submit} disabled={busy}>{busy ? '添加中…' : '添加引擎'}</button>
+        </div>
+        <div className="cloud-list">
+          {providers.length === 0
+            ? <p className="cloud-empty">还没有添加云引擎</p>
+            : providers.map((p) => (
+              <div key={p.id} className="cloud-item">
+                <div className="cloud-item__info">
+                  <b>{p.label}</b> <span className="cloud-model">{p.models.join(', ')}</span>
+                  <div className="cloud-key">{p.keyMasked}</div>
+                </div>
+                <button className="nbtn cloud-del" onClick={() => onRemove(p.id)}>删除</button>
+              </div>
+            ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function SpeakingDots() {
@@ -174,6 +249,28 @@ export default function App() {
   const [results, setResults] = useState({})
   const [running, setRunning] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const [cloud, setCloud] = useState([])
+
+  function loadEngines() {
+    fetch('/api/engines').then((r) => r.json()).then((d) => setEngines(d.engines)).catch(() => {})
+  }
+  function loadCloud() {
+    fetch('/api/cloud').then((r) => r.json()).then((d) => setCloud(d.providers || [])).catch(() => {})
+  }
+  async function addCloud(form) {
+    const res = await fetch('/api/cloud', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+    const d = await res.json()
+    if (!res.ok) throw new Error(d.error || '添加失败')
+    setCloud(d.providers || [])
+    loadEngines()
+  }
+  async function removeCloud(id) {
+    const res = await fetch(`/api/cloud/${encodeURIComponent(id)}`, { method: 'DELETE' })
+    const d = await res.json().catch(() => ({}))
+    setCloud(d.providers || [])
+    loadEngines()
+  }
 
   function copyText(text, id) {
     if (!text || !navigator.clipboard) return
@@ -205,7 +302,8 @@ export default function App() {
   }
 
   useEffect(() => {
-    fetch('/api/engines').then((r) => r.json()).then((d) => setEngines(d.engines))
+    loadEngines()
+    loadCloud()
     fetch('/api/hats').then((r) => r.json()).then(setHats)
   }, [])
 
@@ -307,6 +405,7 @@ export default function App() {
               ))
             )}
           </div>
+          <button className="btn-icon" onClick={() => setShowSettings(true)} title="云引擎设置"><IconGear /></button>
           <button className="btn-share" onClick={() => copyText(buildMarkdown(), 'all')} disabled={!canCopyAll}>
             {copiedId === 'all' ? '已复制 ✓' : '分享看板'}
           </button>
@@ -350,6 +449,8 @@ export default function App() {
       </section>
 
       <footer className="board-footer">Local-first · 六顶思考帽 · De Bono Six Thinking Hats</footer>
+
+      <CloudSettings open={showSettings} onClose={() => setShowSettings(false)} providers={cloud} onAdd={addCloud} onRemove={removeCloud} />
     </div>
   )
 }

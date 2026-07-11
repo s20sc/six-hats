@@ -18,6 +18,10 @@ describe('server routes', () => {
     const res = await call(createApp({ registry: reg(), cfg }), 'get', '/api/engines')
     expect(res.body.engines[0].id).toBe('e')
   })
+  it('GET /api/cloud returns a providers array', async () => {
+    const res = await call(createApp({ registry: reg(), cfg }), 'get', '/api/cloud')
+    expect(Array.isArray(res.body.providers)).toBe(true)
+  })
   it('GET /api/engines re-detects each call when a detect fn is given', async () => {
     let n = 0
     const detect = async () => {

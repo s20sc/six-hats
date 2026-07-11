@@ -9,10 +9,11 @@ import { detectEngines, summarize } from './engines/detect.js'
 import { HATS, applySkin, applyPromptOverrides } from './hats.js'
 import { assignEngines } from './assign.js'
 import { runDeliberation, runSingleHat } from './orchestrate.js'
+import { listMasked, saveCloudProvider, deleteCloudProvider } from './cloud-store.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export function createApp({ registry, cfg, detect } = {}) {
+export function createApp({ registry, cfg, detect, invalidate } = {}) {
   const app = express()
   app.use(express.json())
   const hats = applyPromptOverrides(applySkin(HATS, cfg.skins), cfg.hatPromptOverrides)
@@ -70,6 +71,21 @@ export function createApp({ registry, cfg, detect } = {}) {
   })
   app.post('/api/reset', (req, res) => { try { fs.unlinkSync(stateFile()) } catch {} res.json({ ok: true }) })
 
+  // ── User-added cloud engines (enter an API key, no CLI needed) ──────
+  app.get('/api/cloud', (req, res) => res.json({ providers: listMasked() }))
+  app.post('/api/cloud', (req, res) => {
+    try {
+      saveCloudProvider(req.body ?? {})
+      invalidate?.() // force /api/engines to re-detect immediately, not after the TTL
+      res.json({ ok: true, providers: listMasked() })
+    } catch (e) { res.status(400).json({ error: e.message }) }
+  })
+  app.delete('/api/cloud/:id', (req, res) => {
+    deleteCloudProvider(req.params.id)
+    invalidate?.()
+    res.json({ ok: true, providers: listMasked() })
+  })
+
   app.use(express.static(join(__dirname, '..', '..', 'dist')))
   return app
 }
@@ -86,8 +102,9 @@ export async function start() {
     cachedAt = Date.now()
     return cached
   }
+  const invalidate = () => { cachedAt = 0 }
   const registry = await detect()
-  const app = createApp({ registry, cfg, detect })
+  const app = createApp({ registry, cfg, detect, invalidate })
   const host = process.env.HOST || '127.0.0.1'
   return await new Promise((resolve, reject) => {
     const server = app.listen(cfg.port, host, () => {

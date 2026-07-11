@@ -1,5 +1,6 @@
 import { EngineRegistry } from './registry.js'
 import { CLI_TABLE, makeCliEngine, whichSync, listOpenclawAgents } from './cli.js'
+import { loadCloudProviders } from '../cloud-store.js'
 import { listOllamaModels, makeOllamaEngine } from './ollama.js'
 import { makeOpenAiEngine } from './openai.js'
 import { makeCustomEngine } from './custom.js'
@@ -8,6 +9,7 @@ export async function detectEngines(cfg, deps = {}) {
   const which = deps.which ?? whichSync
   const listOllama = deps.listOllama ?? ((d) => listOllamaModels(d))
   const listOpenclaw = deps.listOpenclaw ?? ((d) => listOpenclawAgents(d))
+  const loadCloud = deps.loadCloud ?? (() => loadCloudProviders())
   const reg = new EngineRegistry()
 
   // Built-in CLI tools. openclaw needs an agent id per engine: by default we
@@ -34,8 +36,8 @@ export async function detectEngines(cfg, deps = {}) {
   const models = await listOllama({ fetchImpl: deps.fetchImpl, baseUrl: cfg.ollamaHost || undefined })
   for (const m of models) reg.add(makeOllamaEngine(m, { fetchImpl: deps.fetchImpl, baseUrl: cfg.ollamaHost || undefined }))
 
-  // Cloud (already key-filtered by loadConfig)
-  for (const c of cfg.cloud ?? []) {
+  // Cloud: from config.json (key-filtered by loadConfig) + user-added providers (in-app)
+  for (const c of [...(cfg.cloud ?? []), ...loadCloud()]) {
     for (const model of c.models) {
       reg.add(makeOpenAiEngine({ id: `${c.id}:${model}`, label: `${c.label} ${model}`, baseUrl: c.baseUrl, apiKey: c.apiKey, model, fetchImpl: deps.fetchImpl }))
     }
