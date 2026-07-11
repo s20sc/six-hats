@@ -120,41 +120,37 @@ body {
   margin: -12px 0 22px; padding: 10px 16px;
 }
 
-/* ── Canvas grid ─────────────────────────────────────────────────── */
+/* ── Canvas grid: all six hats visible at once (3 × 2) ───────────── */
 .canvas {
-  position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px;
-}
-.doodles {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 0; opacity: 0.9;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-/* ── Cards ───────────────────────────────────────────────────────── */
+/* ── Cards (compact) ─────────────────────────────────────────────── */
 .card {
   position: relative; z-index: 1;
   background: color-mix(in srgb, var(--hat-color) 14%, #fff);
   border: 2px solid var(--ink);
-  border-radius: 16px;
-  padding: 20px 22px 22px;
+  border-radius: 14px;
+  padding: 14px 16px 16px;
   box-shadow: var(--shadow);
-  display: flex; flex-direction: column; gap: 14px;
+  display: flex; flex-direction: column; gap: 10px;
   transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s;
   animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
-.card:hover { transform: translate(-4px, -4px); box-shadow: var(--shadow-hover); }
+.card:hover { transform: translate(-3px, -3px); box-shadow: var(--shadow-hover); }
 .card--speaking { box-shadow: var(--shadow-hover); }
-.card--synthesis { grid-column: span 2; border-width: 3px; }
+/* the blue hat is the synthesis — keep it in the grid but mark it as the conclusion */
+.card--blue { border-width: 3px; }
 
 .card-head {
-  display: flex; align-items: center; gap: 12px;
-  border-bottom: 1.5px dashed #b8bcc4; padding-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1.5px dashed #b8bcc4; padding-bottom: 9px;
 }
-.card-icon { font-size: 1.9rem; line-height: 1; }
+.card-icon { font-size: 1.55rem; line-height: 1; }
 .card-title-group { display: flex; flex-direction: column; min-width: 0; }
-.card-title { font-weight: 800; font-size: 1.12rem; color: var(--ink); }
+.card-title { font-weight: 800; font-size: 1.02rem; color: var(--ink); }
 .card-subtitle {
   font-size: 0.68rem; color: var(--ink-3); font-weight: 700;
   letter-spacing: 0.03em; text-transform: uppercase;
@@ -163,8 +159,8 @@ body {
 
 .card-badge {
   margin-left: auto; flex: none;
-  font-size: 0.68rem; font-weight: 800;
-  padding: 4px 9px; border-radius: 6px;
+  font-size: 0.64rem; font-weight: 800;
+  padding: 3px 8px; border-radius: 6px;
   border: 1.5px solid var(--ink); background: #fff;
   white-space: nowrap;
 }
@@ -172,23 +168,22 @@ body {
 .card-badge--speaking { background: #fde68a; color: #92400e; }
 .card-badge--done { background: #bbf7d0; color: #166534; }
 .card-badge--error { background: #fecaca; color: #991b1b; }
-.card-badge--action { background: #bfdbfe; color: #1d4ed8; }
 
 /* engine picker + tools */
-.card-pin { display: flex; align-items: center; gap: 10px; }
+.card-pin { display: flex; align-items: center; gap: 8px; }
 .card-pin select {
   flex: 1; min-width: 0;
   background: #fff; color: var(--ink-2);
   border: 2px solid var(--ink); border-radius: 8px;
-  padding: 6px 10px; font-family: var(--font-sans);
-  font-size: 0.78rem; font-weight: 700; cursor: pointer;
+  padding: 5px 9px; font-family: var(--font-sans);
+  font-size: 0.75rem; font-weight: 700; cursor: pointer;
   box-shadow: var(--shadow-sm);
 }
 .card-pin select:focus { outline: none; }
 .card-tools { display: flex; gap: 4px; }
 .tool {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px;
+  width: 28px; height: 28px;
   background: #fff; border: 2px solid var(--ink); border-radius: 8px;
   color: var(--ink); cursor: pointer; box-shadow: var(--shadow-sm);
   transition: transform 0.1s, box-shadow 0.1s, opacity 0.1s;
@@ -197,16 +192,10 @@ body {
 .tool:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
 .tool:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
 
-.card-body { flex: 1; min-height: 70px; }
-.card-text { font-size: 0.92rem; line-height: 1.7; color: #262626; white-space: pre-wrap; word-break: break-word; }
-.card-placeholder { font-family: var(--font-hand); font-size: 1.3rem; color: var(--ink-3); }
-.card-error { font-weight: 700; font-size: 0.85rem; color: #b91c1c; word-break: break-word; }
-
-.synthesis-body { display: flex; gap: 22px; align-items: center; }
-.synthesis-text { flex: 1; min-width: 0; }
-.synthesis-body .card-text { font-size: 0.98rem; line-height: 1.85; }
-.synthesis-note { flex: none; width: 118px; display: flex; justify-content: center; }
-.synthesis-note .sticky-note { position: static; transform: rotate(-4deg); }
+.card-body { flex: 1; min-height: 46px; }
+.card-text { font-size: 0.86rem; line-height: 1.6; color: #262626; white-space: pre-wrap; word-break: break-word; }
+.card-placeholder { font-family: var(--font-hand); font-size: 1.1rem; color: var(--ink-3); }
+.card-error { font-weight: 700; font-size: 0.82rem; color: #b91c1c; word-break: break-word; }
 
 /* thinking dots */
 .dots { display: inline-flex; gap: 6px; padding: 6px 0; }
@@ -220,8 +209,8 @@ body {
 
 /* ── Sticky notes & stickers (whiteboard decoration) ─────────────── */
 .sticky-note {
-  position: absolute; width: 96px; height: 96px; padding: 10px;
-  font-family: var(--font-hand); font-weight: 700; font-size: 1.5rem;
+  position: absolute; width: 72px; height: 72px; padding: 8px;
+  font-family: var(--font-hand); font-weight: 700; font-size: 1.15rem;
   line-height: 1.05; color: var(--ink);
   border: 2px solid var(--ink); box-shadow: var(--shadow-sm);
   display: flex; align-items: center; justify-content: center; text-align: center;
@@ -231,9 +220,9 @@ body {
 .sticky--yellow { background: #fef08a; }
 .sticky--pink { background: #fbcfe8; }
 .sticky--blue { background: #bfdbfe; }
-.sticky--tr { top: -24px; right: -22px; transform: rotate(6deg); }
-.sticky--bl { bottom: -40px; right: -18px; transform: rotate(-6deg); }
-.sticky--br { bottom: -40px; right: 18px; transform: rotate(4deg); }
+/* hang off the outer-bottom corners into the empty area below the grid */
+.sticky--bl { bottom: -42px; left: -16px; transform: rotate(-6deg); }
+.sticky--br { bottom: -42px; right: -16px; transform: rotate(6deg); }
 
 .sticker {
   position: absolute; padding: 5px 12px;
@@ -261,12 +250,11 @@ body {
 }
 
 /* ── Responsive ──────────────────────────────────────────────────── */
-@media (max-width: 900px) {
+@media (max-width: 940px) {
+  .canvas { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 620px) {
   .canvas { grid-template-columns: 1fr; }
-  .card--synthesis { grid-column: span 1; }
-  .doodles { display: none; }
-  .synthesis-body { flex-direction: column; align-items: flex-start; }
-  .synthesis-note { width: auto; }
 }
 @media (max-width: 520px) {
   .deck .nbtn { flex: 1; justify-content: center; }

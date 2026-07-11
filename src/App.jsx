@@ -28,10 +28,12 @@ const HAT_ACCENT = { white: '#9ca3af' }
 const accentOf = (hat) => HAT_ACCENT[hat.id] || hat.color
 
 // Playful pinned annotations — pure whiteboard decoration, one per few hats.
+// Bottom-row hats only — notes hang off the outer-bottom corners into the empty
+// area below the grid, clear of every card's title and text.
 const STICKY = {
-  white: { text: '数据！', tone: 'yellow', pos: 'tr' },
-  black: { text: '当心⚠', tone: 'pink', pos: 'bl' },
+  yellow: { text: '价值！', tone: 'yellow', pos: 'bl' },
   green: { text: 'Good Idea!', tone: 'sticker-green', pos: 'br', sticker: true },
+  blue: { text: '推进！', tone: 'blue', pos: 'br' },
 }
 
 const AVATAR_TONES = ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444']
@@ -110,57 +112,6 @@ function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRe
       </div>
 
       <StickyNote note={note} />
-    </article>
-  )
-}
-
-function Synthesis({ hat, engines, assignedId, pinnedId, onPinChange, result, summaryText, onRefresh, canRefresh, onCopy, copiedId }) {
-  const status = result?.status ?? 'idle'
-  const assignedEngine = engines.find((e) => e.id === assignedId)
-  const text = summaryText || result?.text || ''
-
-  return (
-    <article className="card card--blue card--synthesis" style={{ '--hat-color': hat.color }}>
-      <div className="card-head">
-        <span className="card-icon">{hat.emoji}</span>
-        <div className="card-title-group">
-          <h3 className="card-title">{hat.name}</h3>
-          <span className="card-subtitle">{HAT_LABELS.blue}</span>
-        </div>
-        <span className="card-badge card-badge--action">行动建议</span>
-      </div>
-
-      <div className="card-pin">
-        <select value={pinnedId ?? ''} onChange={(e) => onPinChange(hat.id, e.target.value || null)}>
-          <option value="">🎲 随机{assignedEngine ? ` → ${assignedEngine.label}` : ''}</option>
-          {engines.map((en) => (
-            <option key={en.id} value={en.id}>{en.label}</option>
-          ))}
-        </select>
-        <div className="card-tools">
-          <button className="tool" onClick={() => onCopy(text, hat.id)} disabled={!text} title="复制蓝帽总结">
-            {copiedId === hat.id ? <IconCheck /> : <IconCopy />}
-          </button>
-          <button className="tool" onClick={() => onRefresh(hat.id)} disabled={!canRefresh} title="重新生成总结">
-            <IconRefresh />
-          </button>
-        </div>
-      </div>
-
-      <div className="card-body synthesis-body">
-        <div className="synthesis-text">
-          {status === 'error' ? (
-            <span className="card-error">⚠ {result.error}</span>
-          ) : status === 'speaking' ? (
-            <SpeakingDots />
-          ) : text ? (
-            <p className="card-text">{text}</p>
-          ) : (
-            <p className="card-placeholder">其他帽子发言后，蓝帽在此综合共识与分歧，给出结论与下一步。</p>
-          )}
-        </div>
-        <div className="synthesis-note"><span className="sticky-note sticky--blue">逐步推进！</span></div>
-      </div>
     </article>
   )
 }
@@ -285,9 +236,6 @@ export default function App() {
     }
   }
 
-  const inputHats = hats.filter((h) => h.id !== 'blue')
-  const blueHat = hats.find((h) => h.id === 'blue')
-
   const canAssign = engines.length > 0
   const canRun = !running && topic.trim() && Object.keys(assignment).length > 0
   const canCopyAll = hats.some((h) => results[h.id]?.status === 'done' && results[h.id]?.text)
@@ -340,12 +288,7 @@ export default function App() {
       {assignError && <div className="assign-error">⚠ {assignError}</div>}
 
       <section className="canvas">
-        <svg className="doodles" aria-hidden="true" viewBox="0 0 1000 700" preserveAspectRatio="none">
-          <path d="M 300 120 Q 500 60 520 260" stroke="#c7cbe6" strokeWidth="3" fill="none" strokeDasharray="7 8" strokeLinecap="round" />
-          <path d="M 480 360 Q 380 460 300 430" stroke="#d6d0c2" strokeWidth="3" fill="none" strokeDasharray="7 8" strokeLinecap="round" />
-        </svg>
-
-        {inputHats.map((h) => (
+        {hats.map((h) => (
           <HatCard
             key={h.id}
             hat={h}
@@ -360,22 +303,6 @@ export default function App() {
             copiedId={copiedId}
           />
         ))}
-
-        {blueHat && (
-          <Synthesis
-            hat={blueHat}
-            engines={engines}
-            assignedId={assignment.blue}
-            pinnedId={pins.blue}
-            onPinChange={(hatId, engineId) => setPins((p) => ({ ...p, [hatId]: engineId }))}
-            result={results.blue}
-            summaryText={summaryText}
-            onRefresh={refreshHat}
-            canRefresh={Boolean(topic.trim()) && Boolean(assignment.blue)}
-            onCopy={copyText}
-            copiedId={copiedId}
-          />
-        )}
       </section>
 
       <footer className="board-footer">Local-first · 六顶思考帽 · De Bono Six Thinking Hats</footer>
