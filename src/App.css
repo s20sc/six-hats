@@ -129,7 +129,7 @@ body {
 
 /* ── Cards (compact) ─────────────────────────────────────────────── */
 .card {
-  position: relative; z-index: 1;
+  position: relative; /* no z-index: keeps dragged sticky notes (z-index 6) above other cards */
   background: color-mix(in srgb, var(--hat-color) 14%, #fff);
   border: 2px solid var(--ink);
   border-radius: 14px;
@@ -214,23 +214,24 @@ body {
   line-height: 1.1; color: var(--ink); white-space: nowrap;
   border: 2px solid var(--ink); box-shadow: var(--shadow-sm);
   display: flex; align-items: center; justify-content: center; text-align: center;
-  z-index: 6; cursor: grab; transition: transform 0.18s;
+  z-index: 6; cursor: grab; touch-action: none; user-select: none;
 }
-.sticky-note:hover { transform: scale(1.08) rotate(0deg) !important; z-index: 12; }
+.sticky-note:active, .sticker:active { cursor: grabbing; box-shadow: var(--shadow); }
 .sticky--yellow { background: #fef08a; }
 .sticky--pink { background: #fbcfe8; }
 .sticky--blue { background: #bfdbfe; }
-/* hang off the outer-bottom corners into the empty area below the grid */
-.sticky--bl { bottom: -42px; left: -16px; transform: rotate(-6deg); }
-.sticky--br { bottom: -42px; right: -16px; transform: rotate(6deg); }
+/* base hang-point (below the grid); rotation + drag offset are applied inline */
+.sticky--bl { bottom: -42px; left: -16px; }
+.sticky--br { bottom: -42px; right: -16px; }
 
 .sticker {
   position: absolute; padding: 5px 12px;
   font-weight: 800; font-size: 0.82rem; color: #fff;
   border: 2px solid var(--ink); border-radius: 6px;
   box-shadow: var(--shadow-sm); z-index: 6; white-space: nowrap;
+  cursor: grab; touch-action: none; user-select: none;
 }
-.sticker--sticker-green { background: #34d399; bottom: -12px; right: 26px; transform: rotate(5deg); }
+.sticker--sticker-green { background: #34d399; bottom: -12px; right: 26px; }
 
 /* ── Footer ──────────────────────────────────────────────────────── */
 .board-footer {

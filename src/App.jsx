@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 const STATUS_LABELS = { idle: '待发言', speaking: '思考中', done: '已完成', error: '出错' }
@@ -31,9 +31,9 @@ const accentOf = (hat) => HAT_ACCENT[hat.id] || hat.color
 // Bottom-row hats only — notes hang off the outer-bottom corners into the empty
 // area below the grid, clear of every card's title and text.
 const STICKY = {
-  yellow: { text: '价值！', tone: 'yellow', pos: 'bl' },
-  green: { text: 'Good Idea!', tone: 'sticker-green', pos: 'br', sticker: true },
-  blue: { text: '推进！', tone: 'blue', pos: 'br' },
+  yellow: { text: '价值！', tone: 'yellow', pos: 'bl', rot: -6 },
+  green: { text: 'Good Idea!', tone: 'sticker-green', pos: 'br', sticker: true, rot: 5 },
+  blue: { text: '推进！', tone: 'blue', pos: 'br', rot: 6 },
 }
 
 const AVATAR_TONES = ['#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444']
@@ -59,10 +59,51 @@ function SpeakingDots() {
   return <span className="dots" aria-label="思考中"><span /><span /><span /></span>
 }
 
-function StickyNote({ note }) {
+// Draggable pinned note — drag it out of the way when long text runs under it.
+// Offset persists per hat in localStorage.
+function StickyNote({ note, storageKey }) {
+  const key = storageKey ? `sixhats.sticky.${storageKey}` : null
+  const [pos, setPos] = useState(() => {
+    if (!key) return { dx: 0, dy: 0 }
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : { dx: 0, dy: 0 } } catch { return { dx: 0, dy: 0 } }
+  })
+  const dragRef = useRef(null)
+  const posRef = useRef(pos)
+  posRef.current = pos
   if (!note) return null
+  const rot = note.rot ?? 0
+
+  function down(e) {
+    e.preventDefault()
+    try { e.currentTarget.setPointerCapture(e.pointerId) } catch {}
+    dragRef.current = { sx: e.clientX, sy: e.clientY, dx: pos.dx, dy: pos.dy }
+  }
+  function move(e) {
+    const d = dragRef.current
+    if (!d) return
+    setPos({ dx: d.dx + (e.clientX - d.sx), dy: d.dy + (e.clientY - d.sy) })
+  }
+  function up(e) {
+    if (!dragRef.current) return
+    dragRef.current = null
+    try { e.currentTarget.releasePointerCapture(e.pointerId) } catch {}
+    if (key) { try { localStorage.setItem(key, JSON.stringify(posRef.current)) } catch {} }
+  }
+
   const cls = note.sticker ? `sticker sticker--${note.tone}` : `sticky-note sticky--${note.tone} sticky--${note.pos}`
-  return <span className={cls}>{note.text}</span>
+  return (
+    <span
+      className={cls}
+      style={{ transform: `translate(${pos.dx}px, ${pos.dy}px) rotate(${rot}deg)` }}
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={up}
+      title="拖动我"
+    >
+      {note.text}
+    </span>
+  )
 }
 
 function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRefresh, canRefresh, onCopy, copiedId }) {
@@ -111,7 +152,7 @@ function HatCard({ hat, engines, assignedId, pinnedId, onPinChange, result, onRe
         )}
       </div>
 
-      <StickyNote note={note} />
+      <StickyNote note={note} storageKey={hat.id} />
     </article>
   )
 }
