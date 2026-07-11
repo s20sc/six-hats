@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "main": "electron/main.js",
   "engines": {
     "node": ">=18"
   },
@@ -14,7 +15,10 @@
     "preview": "vite preview",
     "start": "node src/server/server.js",
     "server": "node src/server/server.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "icons": "node electron/make-icons.mjs",
+    "app": "npm run icons && npm run build && electron .",
+    "dist:mac": "npm run icons && npm run build && electron-builder --mac"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
@@ -24,8 +28,32 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
     "supertest": "^7.2.2",
     "vite": "^6.0.5",
     "vitest": "^2.1.8"
+  },
+  "build": {
+    "appId": "com.qinxue.sixhats",
+    "productName": "Six Hats",
+    "asar": false,
+    "files": [
+      "electron/**/*",
+      "src/server/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png"
+    },
+    "directories": {
+      "output": "release"
+    }
   }
 }
