@@ -30,10 +30,18 @@ describe('cloud-store', () => {
     expect(loaded[0].apiKey).toBe('k2')
     fs.rmSync(file, { force: true })
   })
-  it('rejects missing fields and non-http baseUrl', () => {
+  it('rejects missing fields, bad protocol, and embedded credentials', () => {
     const file = tmp()
     expect(() => saveCloudProvider({ label: 'X', baseUrl: 'https://a/v1', apiKey: 'k' }, { file })).toThrow()
     expect(() => saveCloudProvider({ label: 'X', baseUrl: 'ftp://a', apiKey: 'k', model: 'm' }, { file })).toThrow(/baseUrl/)
+    expect(() => saveCloudProvider({ label: 'X', baseUrl: 'not a url', apiKey: 'k', model: 'm' }, { file })).toThrow(/URL/)
+    expect(() => saveCloudProvider({ label: 'X', baseUrl: 'https://u:p@host/v1', apiKey: 'k', model: 'm' }, { file })).toThrow(/用户名|密码/)
+  })
+  it('normalizes baseUrl — strips query, hash, and trailing slash', () => {
+    const file = tmp()
+    const p = saveCloudProvider({ label: 'X', baseUrl: 'https://host.com/v1/?a=1#f', apiKey: 'k', model: 'm' }, { file })
+    expect(p.baseUrl).toBe('https://host.com/v1')
+    fs.rmSync(file, { force: true })
   })
   it('deletes a provider by id', () => {
     const file = tmp()

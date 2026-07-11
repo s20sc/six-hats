@@ -29,13 +29,22 @@ export function loadCloudProviders({ file = cloudFile() } = {}) {
   )
 }
 
+// Validate + normalize to origin+path only (drops credentials / query / hash / trailing slash).
+function normalizeBaseUrl(raw) {
+  let u
+  try { u = new URL(raw) } catch { throw new Error('baseUrl 不是合法的 URL') }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error('baseUrl 必须是 http(s)://')
+  if (!u.hostname) throw new Error('baseUrl 缺少主机名')
+  if (u.username || u.password) throw new Error('baseUrl 不能包含用户名/密码')
+  return `${u.origin}${u.pathname}`.replace(/\/+$/, '')
+}
+
 export function saveCloudProvider(input, { file = cloudFile() } = {}) {
   const label = String(input?.label ?? '').trim()
-  const baseUrl = String(input?.baseUrl ?? '').trim()
   const apiKey = String(input?.apiKey ?? '').trim()
   const model = String(input?.model ?? '').trim()
-  if (!label || !baseUrl || !apiKey || !model) throw new Error('缺少 label / baseUrl / apiKey / model')
-  if (!/^https?:\/\//.test(baseUrl)) throw new Error('baseUrl 必须以 http(s):// 开头')
+  if (!label || !input?.baseUrl || !apiKey || !model) throw new Error('缺少 label / baseUrl / apiKey / model')
+  const baseUrl = normalizeBaseUrl(String(input.baseUrl).trim())
   const id = `${slug(label)}--${slug(model)}`
   const provider = { id, label, baseUrl, apiKey, models: [model] }
   const list = readAll(file).filter((p) => p.id !== id) // upsert by id

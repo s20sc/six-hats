@@ -72,18 +72,26 @@ export function createApp({ registry, cfg, detect, invalidate } = {}) {
   app.post('/api/reset', (req, res) => { try { fs.unlinkSync(stateFile()) } catch {} res.json({ ok: true }) })
 
   // ── User-added cloud engines (enter an API key, no CLI needed) ──────
+  // After a change, rebuild the live registry now so /api/run etc. can't keep invoking a
+  // just-deleted engine (and its closed-over key) until someone happens to hit /api/engines.
+  async function refreshRegistry() {
+    invalidate?.()
+    if (detect) { try { reg = await detect() } catch {} }
+  }
   app.get('/api/cloud', (req, res) => res.json({ providers: listMasked() }))
-  app.post('/api/cloud', (req, res) => {
+  app.post('/api/cloud', async (req, res) => {
     try {
       saveCloudProvider(req.body ?? {})
-      invalidate?.() // force /api/engines to re-detect immediately, not after the TTL
+      await refreshRegistry()
       res.json({ ok: true, providers: listMasked() })
     } catch (e) { res.status(400).json({ error: e.message }) }
   })
-  app.delete('/api/cloud/:id', (req, res) => {
-    deleteCloudProvider(req.params.id)
-    invalidate?.()
-    res.json({ ok: true, providers: listMasked() })
+  app.delete('/api/cloud/:id', async (req, res) => {
+    try {
+      deleteCloudProvider(req.params.id)
+      await refreshRegistry()
+      res.json({ ok: true, providers: listMasked() })
+    } catch (e) { res.status(500).json({ error: e.message }) }
   })
 
   app.use(express.static(join(__dirname, '..', '..', 'dist')))

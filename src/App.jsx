@@ -252,24 +252,36 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [cloud, setCloud] = useState([])
 
-  function loadEngines() {
-    fetch('/api/engines').then((r) => r.json()).then((d) => setEngines(d.engines)).catch(() => {})
+  async function loadEngines() {
+    try {
+      const list = (await (await fetch('/api/engines')).json()).engines || []
+      setEngines(list)
+      // drop pins/assignments that reference an engine that no longer exists
+      const ids = new Set(list.map((e) => e.id))
+      setPins((p) => Object.fromEntries(Object.entries(p).filter(([, v]) => !v || ids.has(v))))
+      setAssignment((a) => (Object.values(a).some((v) => !ids.has(v)) ? {} : a))
+      return list
+    } catch { return null }
   }
   function loadCloud() {
     fetch('/api/cloud').then((r) => r.json()).then((d) => setCloud(d.providers || [])).catch(() => {})
   }
   async function addCloud(form) {
     const res = await fetch('/api/cloud', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    const d = await res.json()
+    const d = await res.json().catch(() => ({}))
     if (!res.ok) throw new Error(d.error || '添加失败')
     setCloud(d.providers || [])
-    loadEngines()
+    await loadEngines()
   }
   async function removeCloud(id) {
     const res = await fetch(`/api/cloud/${encodeURIComponent(id)}`, { method: 'DELETE' })
-    const d = await res.json().catch(() => ({}))
-    setCloud(d.providers || [])
-    loadEngines()
+    if (res.ok) {
+      const d = await res.json().catch(() => ({}))
+      setCloud(d.providers || [])
+    } else {
+      loadCloud() // delete failed — resync from server truth instead of assuming it's gone
+    }
+    await loadEngines()
   }
 
   function copyText(text, id) {
