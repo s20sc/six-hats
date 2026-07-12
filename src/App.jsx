@@ -71,12 +71,11 @@ function IconClose() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
 }
 
-function CloudSettings({ open, onClose, providers, onAdd, onRemove }) {
+function CloudSettings({ onClose, providers, onAdd, onRemove }) {
   const [preset, setPreset] = useState(0)
   const [form, setForm] = useState({ label: CLOUD_PRESETS[0].label, baseUrl: CLOUD_PRESETS[0].baseUrl, apiKey: '', model: CLOUD_PRESETS[0].model })
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
-  if (!open) return null
 
   function pick(i) {
     setPreset(i)
@@ -274,13 +273,15 @@ export default function App() {
     await loadEngines()
   }
   async function removeCloud(id) {
-    const res = await fetch(`/api/cloud/${encodeURIComponent(id)}`, { method: 'DELETE' })
-    if (res.ok) {
-      const d = await res.json().catch(() => ({}))
-      setCloud(d.providers || [])
-    } else {
-      loadCloud() // delete failed — resync from server truth instead of assuming it's gone
-    }
+    try {
+      const res = await fetch(`/api/cloud/${encodeURIComponent(id)}`, { method: 'DELETE' })
+      if (res.ok) {
+        const d = await res.json().catch(() => ({}))
+        setCloud(d.providers || [])
+      } else {
+        loadCloud() // delete failed — resync from server truth instead of assuming it's gone
+      }
+    } catch { loadCloud() }
     await loadEngines()
   }
 
@@ -462,7 +463,7 @@ export default function App() {
 
       <footer className="board-footer">Local-first · 六顶思考帽 · De Bono Six Thinking Hats</footer>
 
-      <CloudSettings open={showSettings} onClose={() => setShowSettings(false)} providers={cloud} onAdd={addCloud} onRemove={removeCloud} />
+      {showSettings && <CloudSettings onClose={() => setShowSettings(false)} providers={cloud} onAdd={addCloud} onRemove={removeCloud} />}
     </div>
   )
 }

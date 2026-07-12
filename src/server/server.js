@@ -76,7 +76,7 @@ export function createApp({ registry, cfg, detect, invalidate } = {}) {
   // just-deleted engine (and its closed-over key) until someone happens to hit /api/engines.
   async function refreshRegistry() {
     invalidate?.()
-    if (detect) { try { reg = await detect() } catch {} }
+    if (detect) { try { reg = await detect() } catch (e) { console.warn(`[cloud] registry refresh failed: ${e.message}`) } }
   }
   app.get('/api/cloud', (req, res) => res.json({ providers: listMasked() }))
   app.post('/api/cloud', async (req, res) => {
@@ -104,11 +104,14 @@ export async function start() {
   // every /api/engines hit is wasteful, so reuse a recent result within a short window.
   let cached = null
   let cachedAt = 0
+  let inflight = null
   const detect = async () => {
     if (cached && Date.now() - cachedAt < 3000) return cached
-    cached = await detectEngines(cfg)
-    cachedAt = Date.now()
-    return cached
+    if (inflight) return inflight // coalesce concurrent detections into one run
+    inflight = detectEngines(cfg)
+      .then((r) => { cached = r; cachedAt = Date.now(); return r })
+      .finally(() => { inflight = null })
+    return inflight
   }
   const invalidate = () => { cachedAt = 0 }
   const registry = await detect()
