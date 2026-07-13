@@ -108,6 +108,42 @@ OPENROUTER_API_KEY=sk-or-...
 
 自定义模板始终通过 POSIX shell（`sh`）运行，请使用 `"$SIXHATS_PROMPT"` 引用话题内容；在 Windows 上请使用 WSL 或 Git Bash 提供 `sh`。
 
+## 在 Agent 中使用
+
+Six Hats 也可以无头（headless）运行，作为一个 CLI 供脚本或 Agent 调用。
+
+**CLI**
+
+```bash
+node bin/six-hats.js "<话题或决策>"
+```
+
+常用参数：
+- `--engine <id>` —— 把所有帽子固定到同一个引擎（默认：随机分配，本地优先）。可先用 `--list-engines` 查看可用 id。
+- `--hats white,black,blue` —— 只跑部分帽子（逗号分隔，取值为 `white,red,black,yellow,green,blue`）。
+- `--json` —— 输出 JSON 而非 Markdown。
+- `--quiet` —— 关闭 stderr 上的进度输出。
+- `--list-engines` —— 打印检测到的引擎池后退出。
+- `--timeout <secs>` —— 全局墙钟超时（默认 180 秒）。
+
+命令会把 Markdown 议事结果打印到 stdout；进度信息打印到 stderr，因此 stdout 始终是干净的、可捕获或可管道传递的输出。
+
+**作为 Claude Code Skill**
+
+```bash
+npm run skill:install
+```
+
+该命令会把 `skill/` 目录软链接到 `~/.claude/skills/six-hats`。之后任何 Claude Code Agent 都可以直接调用 `six-hats` skill 来运行一次议事并展示结果。其他没有 skill 机制的 Agent/Harness，直接调用上面的 CLI 命令即可。
+
+**作为插件（Plugin）**
+
+```
+/plugin marketplace add s20sc/six-hats
+```
+
+会把本仓库加为一个插件市场（见 `.claude-plugin/marketplace.json`），这样 `six-hats` 插件（及其内置 skill）就能被直接安装，无需手动 clone。
+
 ## 皮肤（Skins）
 
 无需改代码即可重命名帽子或更换 emoji，通过 `config.json` 中的 `skins` 对象配置：

@@ -108,6 +108,42 @@ You can wire up any command-line tool as an engine via the `custom` array in `co
 
 Custom templates always run via a POSIX shell (`sh`), so reference the prompt as `"$SIXHATS_PROMPT"`. On Windows, use WSL or Git Bash to provide `sh`.
 
+## Use it from an agent
+
+Six Hats also runs headless, as a CLI you can call from scripts or agents.
+
+**CLI**
+
+```bash
+node bin/six-hats.js "<topic or decision>"
+```
+
+Flags:
+- `--engine <id>` — pin every hat to one engine (default: random, local-first). See ids via `--list-engines`.
+- `--hats white,black,blue` — only run some hats (comma list of `white,red,black,yellow,green,blue`).
+- `--json` — emit JSON instead of Markdown.
+- `--quiet` — suppress the stderr progress lines.
+- `--list-engines` — print the detected engine pool and exit.
+- `--timeout <secs>` — global wall-clock cap (default 180).
+
+It prints a Markdown deliberation board on stdout; progress goes to stderr, so `stdout` is always clean output you can capture or pipe.
+
+**As a Claude Code skill**
+
+```bash
+npm run skill:install
+```
+
+This symlinks `skill/` to `~/.claude/skills/six-hats`. Any Claude Code agent can then invoke the `six-hats` skill directly to run a deliberation and present the result. Agents on other harnesses (no skill support) can just shell out to the CLI above.
+
+**As a plugin**
+
+```
+/plugin marketplace add s20sc/six-hats
+```
+
+adds this repo as a plugin marketplace (see `.claude-plugin/marketplace.json`) so the `six-hats` plugin — and its bundled skill — can be installed without cloning manually.
+
 ## Skins
 
 Rename the hats or change their emoji without touching code, via the `skins` object in `config.json`:
