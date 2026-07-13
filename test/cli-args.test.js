@@ -31,4 +31,19 @@ describe('parseArgs', () => {
   it('requires a topic otherwise', () => {
     expect(() => parseArgs([])).toThrow(/topic/i)
   })
+  it('rejects extra positionals', () => {
+    expect(() => parseArgs(['a', 'b'])).toThrow(/too many arguments/i)
+  })
+  it('rejects --hats that matches no valid hats', () => {
+    expect(() => parseArgs(['t', '--hats', ''])).toThrow(/matched no valid hats/i)
+    expect(() => parseArgs(['t', '--hats', ','])).toThrow(/matched no valid hats/i)
+  })
+  it('rejects blue-only hats', () => {
+    expect(() => parseArgs(['t', '--hats', 'blue'])).toThrow(/only synthesizes/i)
+  })
+  it('rejects a non-positive or non-finite --timeout', () => {
+    expect(() => parseArgs(['t', '--timeout', '0'])).toThrow(/positive number of seconds/i)
+    expect(() => parseArgs(['t', '--timeout=-5'])).toThrow(/positive number of seconds/i)
+    expect(() => parseArgs(['t', '--timeout', 'Infinity'])).toThrow(/positive number of seconds/i)
+  })
 })

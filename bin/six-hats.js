@@ -58,4 +58,8 @@ async function main() {
   process.exit(out.anyDone ? 0 : 1)
 }
 
-main().catch((e) => { process.stderr.write(`fatal: ${e.stack || e}\n`); process.exit(1) })
+main().catch((e) => {
+  const msg = process.env.SIX_HATS_DEBUG ? (e.stack || e) : e.message || String(e)
+  process.stderr.write(`fatal: ${msg}\n`)
+  process.exit(1)
+})

@@ -38,4 +38,17 @@ describe('runCli', () => {
     expect(results.white).toMatchObject({ status: 'error' })
     expect(results.white.error).toMatch(/timed out/i)
   })
+  it('preserves a hat that finishes before the timeout while flipping unfinished ones', async () => {
+    const r = reg({
+      e: async (p) => (p.includes('你戴白帽') ? 'fast' : new Promise((res) => setTimeout(() => res('late'), 1000))),
+    })
+    const { results, anyDone } = await runCli(
+      { topic: 'T', hats: HATS.filter((h) => ['white', 'red'].includes(h.id)), engine: 'e', timeoutMs: 50 },
+      r
+    )
+    expect(results.white).toMatchObject({ status: 'done', text: 'fast' })
+    expect(results.red.status).toBe('error')
+    expect(results.red.error).toMatch(/timed out/i)
+    expect(anyDone).toBe(true)
+  })
 })

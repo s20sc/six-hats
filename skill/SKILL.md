@@ -1,6 +1,6 @@
 ---
 name: six-hats
-description: Run a multi-model Six Thinking Hats deliberation on a topic or decision. Use when the user wants a decision weighed from several angles — facts, gut feeling, risks, upside, creative alternatives, and a synthesized conclusion — especially "six thinking hats", "pros and cons and risks", or "look at this from different perspectives". Each hat can run on a different local or cloud model.
+description: Run a multi-model Six Thinking Hats deliberation on a topic or decision. Use when the user explicitly asks for "six thinking hats" / "六顶思考帽", or explicitly asks to deliberate/weigh a decision from all six angles (facts, gut feeling, risks, upside, creative alternatives, synthesis) across several models; for ordinary pros-and-cons or multi-perspective analysis, treat this as an optional suggestion rather than an automatic trigger, since it launches an expensive multi-model run.
 ---
 
 # Six Hats
