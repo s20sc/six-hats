@@ -35,7 +35,7 @@
     "vitest": "^2.1.8"
   },
   "build": {
-    "appId": "com.qinxue.sixhats",
+    "appId": "com.s20sc.sixhats",
     "productName": "Six Hats",
     "asar": false,
     "files": [
