@@ -1,5 +1,5 @@
 import { loadConfig as realLoadConfig } from '../server/config.js'
-import { detectEngines as realDetect, summarize } from '../server/engines/detect.js'
+import { detectEngines as realDetect } from '../server/engines/detect.js'
 import { HATS, applySkin, applyPromptOverrides } from '../server/hats.js'
 
 export async function bootstrapPool(deps = {}) {
