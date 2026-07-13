@@ -8,6 +8,12 @@
 
 一个基于爱德华·德博诺（Edward de Bono）六顶思考帽方法的本地优先协作看板 —— 六个 AI 角色从六个不同角度就你的话题展开讨论，最后由其中一个角色综合归纳出结论。
 
+## 下载
+
+**[下载 macOS App（Apple Silicon）](https://github.com/s20sc/six-hats/releases/latest)** —— 从最新 release 里取 `.dmg`。
+
+该 App **暂未签名/公证**，首次打开需：**右键 → 打开**（一次即可），或在终端运行 `xattr -cr "/Applications/Six Hats.app"`。Intel Mac 或其他系统请改用[源码运行](#快速开始)。
+
 ## 这是什么
 
 你给出一个话题，六顶帽子会各自以其角色发言：

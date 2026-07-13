@@ -8,6 +8,12 @@
 
 A local-first deliberation board built on Edward de Bono's Six Thinking Hats method — six AI personas debate your topic from six angles, then one of them synthesizes the discussion into a conclusion.
 
+## Download
+
+**[Download the macOS app (Apple Silicon)](https://github.com/s20sc/six-hats/releases/latest)** — grab the `.dmg` from the latest release.
+
+The app is **not yet signed/notarized**, so on first launch: **right-click → Open** (once), or run `xattr -cr "/Applications/Six Hats.app"`. On Intel Macs — or any other OS — run from source instead (see [Quick start](#quick-start)).
+
 ## What it is
 
 You give the board a topic. Six hats each respond in character:
