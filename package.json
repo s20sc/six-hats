@@ -48,7 +48,9 @@
       "main": "electron/main.js"
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        { "target": "dmg", "arch": "universal" }
+      ],
       "category": "public.app-category.productivity",
       "icon": "build/icon.png"
     },
