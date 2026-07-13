@@ -9,6 +9,10 @@ const src = join(root, 'skill')
 const dest = join(os.homedir(), '.claude', 'skills', 'six-hats')
 
 fs.mkdirSync(dirname(dest), { recursive: true })
-try { if (fs.lstatSync(dest)) fs.rmSync(dest, { recursive: true, force: true }) } catch {}
+try {
+  const st = fs.lstatSync(dest)
+  if (st.isSymbolicLink()) fs.rmSync(dest)
+  else { console.error(`refusing to overwrite non-symlink at ${dest} — remove it manually first`); process.exit(1) }
+} catch { /* dest does not exist — fine */ }
 fs.symlinkSync(src, dest)
 console.log(`linked ${dest} -> ${src}`)

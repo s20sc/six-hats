@@ -122,6 +122,7 @@ node bin/six-hats.js "<话题或决策>"
 - `--engine <id>` —— 把所有帽子固定到同一个引擎（默认：随机分配，本地优先）。可先用 `--list-engines` 查看可用 id。
 - `--hats white,black,blue` —— 只跑部分帽子（逗号分隔，取值为 `white,red,black,yellow,green,blue`）。
 - `--json` —— 输出 JSON 而非 Markdown。
+- `--quiet` —— 关闭 stderr 上的进度输出。
 - `--list-engines` —— 打印检测到的引擎池后退出。
 - `--timeout <secs>` —— 全局墙钟超时（默认 180 秒）。
 

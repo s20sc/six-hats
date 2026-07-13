@@ -122,6 +122,7 @@ Flags:
 - `--engine <id>` — pin every hat to one engine (default: random, local-first). See ids via `--list-engines`.
 - `--hats white,black,blue` — only run some hats (comma list of `white,red,black,yellow,green,blue`).
 - `--json` — emit JSON instead of Markdown.
+- `--quiet` — suppress the stderr progress lines.
 - `--list-engines` — print the detected engine pool and exit.
 - `--timeout <secs>` — global wall-clock cap (default 180).
 

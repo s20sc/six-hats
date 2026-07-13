@@ -9,17 +9,17 @@ Run a headless six-thinking-hats deliberation and present the returned Markdown.
 
 ## How to use
 
-From the six-hats project directory (or anywhere, if installed globally):
+Run the CLI and present the Markdown it prints on stdout.
 
-```bash
-node bin/six-hats.js "<the user's topic or decision>"
-# or, if globally installed:  six-hats "<topic>"
-```
+- Installed as a **plugin**: `node "$CLAUDE_PLUGIN_ROOT/bin/six-hats.js" "<the user's topic>"`
+- Installed **globally** (`npm i -g .` from the repo): `six-hats "<the user's topic>"`
+- From the **six-hats repo** directory: `node bin/six-hats.js "<the user's topic>"`
 
 Useful flags:
 - `--engine <id>` — run every hat on one model (e.g. `--engine claude`); default mixes different local models per hat.
 - `--hats white,black,blue` — only run some hats.
 - `--json` — machine-readable output.
+- `--quiet` — suppress the stderr progress lines.
 - `--list-engines` — see what models are available first.
 
-The command prints Markdown (topic → each hat's take with its model → 🔵 blue's synthesis). Present that Markdown to the user. Progress prints to stderr; capture stdout for the result.
+The command prints Markdown (topic → each hat's take with its model → 🔵 blue's synthesis) on stdout; progress goes to stderr. Capture stdout and present it to the user.
