@@ -10,9 +10,9 @@
 
 ## 下载
 
-**[下载 macOS App（Apple Silicon）](https://github.com/s20sc/six-hats/releases/latest)** —— 从最新 release 里取 `.dmg`。
+**[下载 macOS App（universal —— Apple Silicon 与 Intel 通用）](https://github.com/s20sc/six-hats/releases/latest)** —— 从最新 release 里取 `.dmg`。
 
-该 App **暂未签名/公证**，首次打开需：**右键 → 打开**（一次即可），或在终端运行 `xattr -cr "/Applications/Six Hats.app"`。Intel Mac 或其他系统请改用[源码运行](#快速开始)。
+该 App **暂未签名/公证**，首次打开需：**右键 → 打开**（一次即可），或在终端运行 `xattr -cr "/Applications/Six Hats.app"`。Windows/Linux 请改用[源码运行](#快速开始)。
 
 ## 这是什么
 
