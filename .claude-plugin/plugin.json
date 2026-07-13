@@ -1,0 +1,7 @@
+{
+  "name": "six-hats",
+  "version": "1.0.0",
+  "description": "Multi-model Six Thinking Hats deliberation as a skill.",
+  "author": "s20sc",
+  "skills": ["./skill"]
+}

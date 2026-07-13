@@ -18,6 +18,7 @@
     "server": "node src/server/server.js",
     "test": "vitest run",
     "icons": "node electron/make-icons.mjs",
+    "skill:install": "node scripts/install-skill.mjs",
     "app": "npm run icons && npm run build && electron .",
     "dist:mac": "npm run icons && npm run build && electron-builder --mac"
   },

@@ -1,0 +1,7 @@
+{
+  "name": "s20sc",
+  "owner": "s20sc",
+  "plugins": [
+    { "name": "six-hats", "source": ".", "description": "Multi-model Six Thinking Hats deliberation." }
+  ]
+}
