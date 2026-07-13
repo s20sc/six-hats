@@ -25,7 +25,7 @@ export async function runDeliberation({ topic, hats, registry, assignment, onUpd
     .map((h) => contributions.find((c) => c.hatId === h.id))
 
   let summary = ''
-  if (ordered.length > 0) {
+  if (blue && ordered.length > 0) {
     onUpdate(blue.id, { status: 'speaking', engineId: assignment[blue.id] })
     try {
       const engine = registry.get(assignment[blue.id])
