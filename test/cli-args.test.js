@@ -15,6 +15,9 @@ describe('parseArgs', () => {
   it('parses and validates --hats subset', () => {
     expect(parseArgs(['t', '--hats', 'white,blue']).hats).toEqual(['white', 'blue'])
   })
+  it('reorders --hats to canonical order and de-dups', () => {
+    expect(parseArgs(['t', '--hats', 'blue,white,white']).hats).toEqual(['white', 'blue'])
+  })
   it('rejects an unknown hat id', () => {
     expect(() => parseArgs(['t', '--hats', 'pink'])).toThrow(/unknown hat/i)
   })
