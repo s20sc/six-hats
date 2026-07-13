@@ -15,6 +15,8 @@ Run the CLI and present the Markdown it prints on stdout.
 - Installed **globally** (`npm i -g .` from the repo): `six-hats "<the user's topic>"`
 - From the **six-hats repo** directory: `node bin/six-hats.js "<the user's topic>"`
 
+If `$CLAUDE_PLUGIN_ROOT` is empty, fall back to a globally-installed `six-hats`, or run `node bin/six-hats.js` from the six-hats repo.
+
 Useful flags:
 - `--engine <id>` — run every hat on one model (e.g. `--engine claude`); default mixes different local models per hat.
 - `--hats white,black,blue` — only run some hats.

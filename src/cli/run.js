@@ -14,7 +14,9 @@ export async function runCli({ topic, hats, engine, timeoutMs = 180000, onProgre
   const results = {}
   for (const h of hats) results[h.id] = { status: 'idle', engineId: assignment[h.id] }
 
+  let timedOut = false
   const onUpdate = (hatId, patch) => {
+    if (timedOut) return
     results[hatId] = { ...results[hatId], ...patch }
     onProgress(hatId, results[hatId])
   }
@@ -26,6 +28,7 @@ export async function runCli({ topic, hats, engine, timeoutMs = 180000, onProgre
   clearTimeout(timer)
 
   if (outcome === 'timeout') {
+    timedOut = true
     for (const h of hats) {
       if (results[h.id].status === 'idle' || results[h.id].status === 'speaking') {
         results[h.id] = { ...results[h.id], status: 'error', error: 'timed out' }
